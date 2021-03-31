@@ -77,7 +77,7 @@ Manufacturer data (customer manufacturer ID and MICROOLED manufacturer ID)
 
 Each data is preceded by two bytes, one for length (including identifier), one for data identifier. 
 
-Exemple:`0x` `1109412E4C6F6F4B20202020303030313238` `0302F5F2` `05FFFADA08F2` .
+Exemple: `0x` `1109412E4C6F6F4B20202020303030313238` `0302F5F2` `05FFFADA08F2`.
 
 It is recommended to filter Bluetooth devices during discovery by manufacturer ID including `0x08F2` or `0xDAFA`
 
@@ -155,11 +155,11 @@ UUID `0000FEF5-0000-1000-8000-00805F9B34FB`
 
 The custom service Rx server characteristic is used to send commands to an ActiveLook® device.
 
-⚠The RX server allows both Bluetooth `WRITE` (with response) and `WRITE_NO_RESPONSE` mode. It is highly recommended to use the `WRITE` (with response) mode. Depending on the master device Bluetooth stack efficiency used the (for instance on connected watches) `WRITE_NO_RESPONSE` (lower latency) can be used.
+⚠ The RX server allows both Bluetooth `WRITE` (with response) and `WRITE_NO_RESPONSE` mode. It is highly recommended to use the `WRITE` (with response) mode. Depending on the master device Bluetooth stack efficiency used the (for instance on connected watches) `WRITE_NO_RESPONSE` (lower latency) can be used.
 
-⚠The command interface uses BINARY encoding.
+⚠ The command interface uses BINARY encoding.
 
-⚠All data are in big Endian (example: to encode 1024, the first byte to send is `0x04`, followed by `0x00`)
+⚠ All data are in big Endian (example: to encode 1024, the first byte to send is `0x04`, followed by `0x00`)
 
 
 A command includes a header and a footer. The header is made of START + Command ID + Command Format + length (+ Query ID). The command layout is as follows:
@@ -170,7 +170,7 @@ A command includes a header and a footer. The header is made of START + Command 
 
 **CommandFormat** : define the format of the command, including the number of bytes of the length (1 or 2 bytes) and the number of byte of the queryID (0 to 15 bytes)
 
-**Length**: defines the length of the whole command header and footer included. The length can be on one or two bytes depending on the command format.
+**Length**: defines the length of the whole command header and footer included. The length can be on one or two bytes depending on the command format. The maximum length is `533` bytes with `512` bytes of data and `15` bytes of queryId.
 
 **QueryId** (optional) : defines by user, allows to identify a query (command) and the associated response. When a query is sent with command, the response includes this query, allowing the user to match the response with the original command in an asynchronous system.
 
@@ -179,15 +179,15 @@ A command includes a header and a footer. The header is made of START + Command 
 **Footer**: always `0xAA`
 
 
-| 0xFF   | 0x..       | 0x0n           | 0x..        | n * 0x…   | 0x.. ………. 0x.. | 0xAA   |
+| 0xFF   | 0x..       | 0x0n           | 0x..        | n * 0x…   | m * 0x…        | 0xAA   |
 |--------|------------|----------------|-------------|-----------|----------------|--------|
-| HEADER  | Command ID | Command Format | data length | Query ID  | Data           | FOOTER |
-| 1 B | 1B     | 1 B         | 1B     | n B | N B        | 1B |
+| HEADER | Command ID | Command Format | data length | Query ID  | Data           | FOOTER |
+| 1B     | 1B         | 1B             | 1B          | nB        | mB             | 1B     |
 
-| 0xFF   | 0x..       | 0x1n           | 0x.. 0x..   | n * 0x…  | 0x.. ………. 0x.. | 0xAA   |
+| 0xFF   | 0x..       | 0x1n           | 0x.. 0x..   | n * 0x…  | m * 0x…        | 0xAA   |
 |--------|------------|----------------|-------------|----------|----------------|--------|
-| HEADER  | Command ID | Command Format | data length | Query ID | Data           | FOOTER |
-| 1B | 1B     | 1B         | 2B    | n B| N B       | 1B |
+| HEADER | Command ID | Command Format | data length | Query ID | Data           | FOOTER |
+| 1B     | 1B         | 1B             | 2B          | nB       | mB             | 1B     |
 
 ⚠ A Command can be sent in multiple BLE chunks. The length and presence of footer are checked to reconstruct the whole command.
 
@@ -197,9 +197,9 @@ A command includes a header and a footer. The header is made of START + Command 
 
 ### Tx server
 
-The Tx server allows communicating from the board to the master device through notifications. 
+The Tx server allows communicating from the device to the master device through notifications. 
 
-⚠The notifications should be enabled by the master device to be able to access this information.
+⚠ The notifications should be enabled by the master device to be able to access this information.
 
 The responses to the “settings” command, version command, bmpList command, fontList command, RPage command, RConfigID command are sent on the TX server.
 
@@ -210,7 +210,7 @@ When the user touch the capacitive button for a short time (>3s) a notification 
 
 Capacitive button notification value: 	`1`
 
-⚠The notifications should be enabled by the master device to be able to access this information.
+⚠ The notifications should be enabled by the master device to be able to access this information.
 
 ### Sensor  server
 
@@ -219,25 +219,29 @@ When a gesture is detected on the glasses (hand motion), a notification is sent 
 
 Gesture notification value: 	`1`
 
-⚠The notifications should be enabled by the master device to be able to access this information.
+⚠ The notifications should be enabled by the master device to be able to access this information.
 
-⚠Enabling/disabling the notification on the gesture server automatically activates/deactivate the gesture sensor (gesture command not needed).
+⚠ Enabling/disabling the notification on the gesture server automatically activates/deactivate the gesture sensor (gesture command not needed).
 
 ### Flow Control server
 
 The Flow Control server provides a method to prevent the application on the Client Device from overloading the BLE memory buffer of the ActiveLook® device. The ActiveLook® device will notify the Client device when the Rx Buffer is getting full, the Client device is required to stop sending data at this time. When the Rx Buffer has been reduced to a safe level, the ActiveLook® device will notify the Client Device to re-start the flow of data. 
 
 Flow control data is interpreted as:
+| Value  | Description                                                                  |
+|--------|------------------------------------------------------------------------------|
+| 0x01   | master can send new data                                                     |
+| 0x02   | master should stop sending data                                              |
+| 0x03   | message error, the command was incomplete or corrupt, the command is ignored |
+| 0x04   | Receive message queue overflow                                               |
+| 0x05   | A font or bitmap message was expecting but device receive something else     |
+| 0x06   | Missing the `WConfigID` command before configuration modification            |
 
-        	SPS_FLOW_CONTROL_ON = 0x01  = master can send new data
-        	SPS_FLOW_CONTROL_OFF = 0x02 = master should stop sending data
-        	SPS_FLOW_MSG_ERROR = 0x03  = message error, the command was incomplete or corrupt, the command is ignored.
-		
-⚠The notifications should be enabled by the master device to be able to access this information.
+⚠ The notifications should be enabled by the master device to be able to access this information.
 
-⚠Once the flow control OFF notification is sent, the subsequent commands will be ignored until the flow control ON is set.
+⚠ Once the flow control OFF notification is sent, the subsequent commands will be ignored until the flow control ON is set.
 
-⚠When a message error command notification is sent after a chunk of data is received during a bitmap or font update, the subsequent chunks are not considered as bitmap or font data. The data uploading is aborted. It is recommended to erase the bitmap for which data was corrupted and resend it with the “savebmp” command.
+⚠ When a message error command notification is sent after a chunk of data is received during a bitmap or font update, the subsequent chunks are not considered as bitmap or font data. The data uploading is aborted. It is recommended to erase the bitmap for which data was corrupted and resend it with the “savebmp” command.
 
 ## ActiveLook® Commands
 
@@ -248,117 +252,117 @@ Flow control data is interpreted as:
 `r`: radius
 `f`: font
 `c`: color
+`bpp`: bit per pixel
 
 
 ### General commands
 
-| ID   | commands | parameters               | Data length (B) | Description                                                  |
+| ID   | commands | parameters               | Data length (B)    | Description                                                  |
 |------|----------|--------------------------|--------------------|--------------------------------------------------------------|
-| 0x00 | power    | `0x00`,`0x01`             | 1                  | set the power of display and initialize display              |
+| 0x00 | power    | `0x00` / `0x01`          | 1                  | set the power of display and initialize display              |
 | 0x01 | clear    | -                        | 0                  | Clear the display memory (black screen)                      |
-| 0x02 | grey     | `0x00`..`0x0F`             | 1                  | Set the whole display memory to the corresponding grey level |
+| 0x02 | grey     | `0x00`..`0x0F`           | 1                  | Set the whole display memory to the corresponding grey level |
 | 0x03 | demo     | -                        | 0                  | Display demonstration pattern                                |
-| 0x04 | test     | `Id`                  | 1                  | Display the corresponding test pattern                       |
-| 0x05 | battery  | -                        | 0                  | Return the battery level on the bas service                  |
-| 0x06 | vers     | -                        | 0                  | Return the board ID and firmware version.                    |
-| 0x07 | debug    | `0x00`,`0x01`             | 1                  | When activated return BLE data received to USB               |
-| 0x08 | led      | `0x00`, `0x01`, `0x02`            | 1                  | Activate/deactivate green LED                                |
-| 0x09 | shift    | `xmsb` `xlsb` `ymsb` `ylsb` | 4                  | Shift all subsequent displayed object of (x,y) pixels        |
+| 0x04 | test     | `0x00` / `0x01`          | 1                  | Display the corresponding test pattern:<br>0: Fill screen<br>1: Rectangle with a cross in it |
+| 0x05 | battery  | -                        | 0                  | Get the battery level                                        |
+| 0x06 | vers     | -                        | 0                  | Get the device ID and firmware version                       |
+| 0x07 | debug    | `0x00` / `0x01`          | 1                  | When activated return BLE data received to USB               |
+| 0x08 | led      | `state`                  | 1                  | set green LED:</br>0: Off</br>1: ON</br>2: toggle</br>3: blinking |
+| 0x09 | shift    | `xmsb` `xlsb` `ymsb` `ylsb` | 4               | Shift all subsequent displayed object of (x,y) pixels        |
 | 0x0A | settings | -                        | 0                  | Return the user parameters used (shift, luma, sensor)        |
-| 0x0B | setname  | `string`                 | >=1                | Customize board BLE advertising name                         |
+| 0x0B | setname  | `string`                 | 0 <= n <= 15       | Customize BLE advertising name</br>The maximum name length is 15</br>Character encoding is 'ASCII'</br>An empty name `n` = 0 will reset factory name |
+
 
 ### Display luminance commands
 
-| ID   | commands | parameters         | Data length (B) | Description                                          |
+| ID   | commands | parameters         | Data length (B)    | Description                                          |
 |------|----------|--------------------|--------------------|------------------------------------------------------|
-| 0x10 | luma     | `0x00`..`0x0F`       | 1                  | Set the display luminance to the corresponding level |
-| 0x11 | dim      | `0x00`..`0x64`       | 1                  | Reduce luminance to given percentage                 |
-
+| 0x10 | luma     | `0x00`..`0x0F`     | 1                  | Set the display luminance to the corresponding level |
+| 0x11 | dim      | `0x00`..`0x64`     | 1                  | Reduce luminance to given percentage                 |
 
 
 ### Optical sensor commands:
 
-| ID   | commands            | parameters                              | Data length (B) | Description                                                                                                                                                                                                                                           |
-|------|---------------------|-----------------------------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 0x20 | sensor              | `0x00`,`0x01`                            | 1                  | Turn on/off the auto brightness adjustment and gesture detection                                                                                                                                                                                      |
-| 0x21 | gesture             | `0x00`,`0x01`                            | 1                  | Turn on/off the gesture detection                                                                                                                                                                                                                     |
-| 0x22 | als                 | `0x00`,`0x01`                            | 1                  | Turn on/off the auto brightness adjustment                                                                                                                                                                                                            |
-| 0x23 | setSensorParameters | `mode` `als Array (18B)`   | 19                 | Set sensor parameters. If mode = 0, it changes als array to compare when luma is changed. If mode = 1, it changes als Period and if mode = 1, it changes ranging period. If AlsPeriod or RangingPeriod is changed, rebooting the device is necessary. |
-|      |                     | `mode` `als Period (2B)`    | 3                  |                                                                                                                                                                                                                                                       |
-|      |                     | `mode` `Ranging Period (2B)` | 3                  |                                                                                                                                                                                                                                                       |
-| 0x24 | getSensorParameters | -                                       | -                  | Get sensor parameters (als Array, Als Period and Ranging Period)                                                                                                                                                                                      |
+| ID   | commands            | parameters                              | Data length (B) | Description                                                      |
+|------|---------------------|-----------------------------------------|-----------------|------------------------------------------------------------------|
+| 0x20 | sensor              | `0x00` / `0x01`                         | 1               | Turn on/off the auto brightness adjustment and gesture detection |
+| 0x21 | gesture             | `0x00` / `0x01`                         | 1               | Turn on/off the gesture detection                                |
+| 0x22 | als                 | `0x00` / `0x01`                         | 1               | Turn on/off the auto brightness adjustment                       |
+| 0x23 | setSensorParameters | `mode` `als_Array (18B)`                | 19              | Set sensor parameters.<br>If mode = 0, it changes ALS array to compare when luma is changed.<br>Reboot the device is necessary |
+|      |                     | `mode` `als_Period (2B)`                | 3               | If mode = 1, it changes ALS period<br>Reboot the device is necessary |
+|      |                     | `mode` `ranging_Period (2B)`            | 3               | If mode = 2, it changes ranging period<br>Reboot the device is necessary |
+| 0x24 | getSensorParameters | -                                       | -               | Get sensor parameters (ALS Array, ALS Period and ranging Period) |
 
 
 ### Graphics commands
-| ID   | commands | Parameters                                                | Data length (B) | Description                                                              |
-|------|----------|-----------------------------------------------------------|--------------------|--------------------------------------------------------------------------|
-| 0x30 | color    | `0x00`…`0x0F`                                               | 1                  | Sets the grey level used to draw the next graphical element              |
-| 0x31 | point    | `x0msb` `x0lsb` `y0msb` `y0lsb`                              | 4                  | Set a pixel on at the corresponding coordinates                          |
-| 0x32 | line     | `x0msb` `x0lsb` `y0msb` `y0lsb` `x1msb` `x1lsb` `y1msb` `y1lsb` | 8                  | Draw a line at the corresponding coordinates                             |
-| 0x33 | rect     | `x0msb` `x0lsb` `y0msb` `y0lsb` `x1msb` `x1lsb` `y1msb` `y1lsb` | 8                  | Draw an empty rectangle at the corresponding coordinates                 |
-| 0x34 | rectf    | `x0msb` `x0lsb` `y0msb` `y0lsb` `x1msb` `x1lsb` `y1msb` `y1lsb` | 8                  | Draw a full rectangle at the corresponding coordinates                   |
-| 0x35 | circ     | `x0msb` `x0lsb` `y0msb` `y0lsb` `r`                          | 5                  | Draw an empty circle at the corresponding coordinates                    |
-| 0x36 | circf    | `x0msb` `x0lsb` `y0msb` `y0lsb` `r`                          | 5                  | Draw a full circle at the corresponding coordinates                      |
-| 0x37 | txt      | `x0msb` `x0lsb` `y0msb` `y0lsb` `r` `f` `c` `string`                 | >=8                | Write text `string` at coordinates(x0,y0) with rotation, font size, and color |
-
+| ID   | commands   | Parameters                                                         | Data length (B) | Description                                                              |
+|------|------------|--------------------------------------------------------------------|-----------------|--------------------------------------------------------------------------|
+| 0x30 | color      | `0x00`…`0x0F`                                                      | 1               | Sets the grey level used to draw the next graphical element              |
+| 0x31 | point      | `x0msb` `x0lsb` `y0msb` `y0lsb`                                    | 4               | Set a pixel on at the corresponding coordinates                          |
+| 0x32 | line       | `x0msb` `x0lsb` `y0msb` `y0lsb` `x1msb` `x1lsb` `y1msb` `y1lsb`    | 8               | Draw a line at the corresponding coordinates                             |
+| 0x33 | rect       | `x0msb` `x0lsb` `y0msb` `y0lsb` `x1msb` `x1lsb` `y1msb` `y1lsb`    | 8               | Draw an empty rectangle at the corresponding coordinates                 |
+| 0x34 | rectf      | `x0msb` `x0lsb` `y0msb` `y0lsb` `x1msb` `x1lsb` `y1msb` `y1lsb`    | 8               | Draw a full rectangle at the corresponding coordinates                   |
+| 0x35 | circ       | `x0msb` `x0lsb` `y0msb` `y0lsb` `r`                                | 5               | Draw an empty circle at the corresponding coordinates                    |
+| 0x36 | circf      | `x0msb` `x0lsb` `y0msb` `y0lsb` `r`                                | 5               | Draw a full circle at the corresponding coordinates                      |
+| 0x37 | txt        | `x0msb` `x0lsb` `y0msb` `y0lsb` `r` `f` `c` `string`               | >= 8            | Write text `string` at coordinates(x0,y0) with rotation, font size, and color |
+| 0x38 | polyline   | `x0msb` `x0lsb` `y0msb` `y0lsb` .. `xNmsb` `xNlsb` `yNmsb` `yNlsb` | (n + 1) * 4     | Draw a multiple connected lines at the corresponding coordinates         |
 
 ### Bitmaps commands
 
-| ID   | commands                    | Parameters                                                                    | Data length (B)           | Description                                                         |
-|------|-----------------------------|-------------------------------------------------------------------------------|------------------------------|---------------------------------------------------------------------|
-| 0x40 | bmplist                     | -                                                                             | 0                            | Give the list of bitmap saved into the board                        |
-| 0x41 | savebmp                     | `Size (4B)` `Width (2B)`                                             | 6 bytes for the first chunk  | Save 4bpp bitmap of `size` bytes and `width` pixels, return image number |
-| 0x42 | bitmap                      | `img_nb` `xmsb` `xlsb` `ymsb` `ylsb`                                                 | 5                            | Display image `img_nb` to the corresponding coordinates                 |
-| 0x43 | erasebmp                    | `img_nb`                                                                     | 1                            | Erase all bitmaps with numbers >= `ìmg_nb`                              |
-| 0x44 | Stream Bitmap               | `Size (4B)` `Width (2B)` `x (2B)` `y (2B)` | 10 bytes for the first chunk | Stream 1bpp bitmap image on display without saving it in memory          |
-| 0x45 | saveBitmap (1 bit = 1 pixel | `Size (4B)` `Width (2B)`                                             | 6 bytes for the first chunk  | Save 1bpp bitmap of `size` bytes and `width` pixels, return image number |
+| ID   | commands                     | Parameters                                 | Data length (B)              | Description                                                              |
+|------|------------------------------|--------------------------------------------|------------------------------|--------------------------------------------------------------------------|
+| 0x40 | bmplist                      | -                                          | 0                            | Give the list of bitmap saved into the device                            |
+| 0x41 | savebmp                      | `Size (4B)` `Width (2B)`                   | 6 bytes for the first chunk  | Save 4bpp bitmap of `size` bytes and `width` pixels                      |
+| 0x42 | bitmap                       | `img_id` `xmsb` `xlsb` `ymsb` `ylsb`       | 5                            | Display image `img_id` to the corresponding coordinates                  |
+| 0x43 | erasebmp                     | `img_id`                                   | 1                            | Erase all bitmaps with numbers >= `img_id`                               |
+| 0x44 | Stream Bitmap                | `Size (4B)` `Width (2B)` `x (2B)` `y (2B)` | 10 bytes for the first chunk | Stream 1bpp bitmap image on display without saving it in memory          |
+| 0x45 | saveBitmap (1 bit = 1 pixel) | `Size (4B)` `Width (2B)`                   | 6 bytes for the first chunk  | Save 1bpp bitmap of `size` bytes and `width` pixels                      |
 
 ### Font commands
 | ID   | commands  | Parameters                                                  | Data length (byte)          | Description                                                 |
 |------|-----------|-------------------------------------------------------------|-----------------------------|-------------------------------------------------------------|
-| 0x50 | fontlist  | -                                                           | 0                           | Give the list of font saved into the board with their size  |
-| 0x51 | savefont  | `nb` `fontSize (2B)` `data (xB)` `dataSize (2B)` | 3B for the first chunk | Save font `nb` of `size` Bytes                              |
-| 0x52 | font      | `0x00`…`0x07`                                                 | 1                           | Selects font which will be used for followings txt commands |
+| 0x50 | fontlist  | -                                                           | 0                           | Give the list of font saved into the device with their size |
+| 0x51 | savefont  | `nb` `fontSize (2B)` `data (xB)` `dataSize (2B)`            | 3B for the first chunk      | Save font `nb` of `size` Bytes                              |
+| 0x52 | font      | `0x00`…`0x07`                                               | 1                           | Selects font which will be used for followings txt commands |
 | 0x53 | erasefont | `nb`                                                        | 1                           | Erase font from flash if present                            |
 
 ### Layout commands
 
-| ID   | commands       | Parameters          | Data length (byte) | Description                                      |
-|------|----------------|---------------------|--------------------|--------------------------------------------------|
-| 0x60 | savelayout     | `layout parameter`  | 11                 | Save a layout (Min 17 hexadecimal parameters)    |
-| 0x61 | eraselayout    | `Id`             | 1                  | Erase corresponding layout                       |
-| 0x62 | layout         | `Id` `text value`        | 2                  | Display `text value` with layout # `Id` parameters     |
-| 0x63 | clearlayout    | `Id`             | 1                  | Clears screen of the corresponding layout area   |
-| 0x65 | layoutPosition | `Id` `xmsb` `xlsb` `y` | 4                  | Redefine the position of a layout                |
+| ID   | commands       | Parameters                          | Data length (byte) | Description                                             |
+|------|----------------|-------------------------------------|--------------------|---------------------------------------------------------|
+| 0x60 | savelayout     | `layout parameter`                  | 11                 | Save a layout (Min 17 hexadecimal parameters)           |
+| 0x61 | eraselayout    | `Id`                                | 1                  | Erase corresponding layout                              |
+| 0x62 | layout         | `Id` `text value`                   | 2                  | Display `text value` with layout # `Id` parameters      |
+| 0x63 | clearlayout    | `Id`                                | 1                  | Clears screen of the corresponding layout area          |
+| 0x65 | layoutPosition | `Id` `xmsb` `xlsb` `y`              | 4                  | Redefine the position of a layout<br/>Position is saved |
+| 0x66 | layoutEx       | `Id` `xmsb` `xlsb` `y` `text value` | 5                  | Display `text value` with layout # `Id` at position `x` `y`<br/>Position is not saved |
 
 ### Gauge commands
 | ID   | commands  | Parameters                                                                           | Data length (byte) | Description                                        |
 |------|-----------|--------------------------------------------------------------------------------------|--------------------|----------------------------------------------------|
-| 0x70 | gauge     | `nb` `value`                                                                          | 2                  | Display value (in percentage) of the gauge ([1…4]) |
+| 0x70 | gauge     | `nb` `value`                                                                         | 2                  | Display value (in percentage) of the gauge ([1…4]) |
 | 0x71 | savegauge | `nb` `xmsb` `xlsb` `ymsb` `ylsb` `rmsb` `rLsb`<br>`r_inmsb` `r_inlsb` `start` `end` `clock wise` | 13                 | Save the parameters for the gauge `nb`             |
  
 ### Page commands                                                                                  
-| ID   | commands   | Parameters                                 | Data length (B) | Description                                  |
-|------|------------|--------------------------------------------|-----------------|----------------------------------------------|
+| ID   | commands   | Parameters                             | Data length (B) | Description                                  |
+|------|------------|----------------------------------------|-----------------|----------------------------------------------|
 | 0x80 | wpage      | `Page Parameters` `parameterSize (2B)` | >= 1            | Save parameters for a given page             |
-| 0x81 | rpage      | -                                          | 0               | Reads saved parameter of a page or all pages |
-| 0x82 | Erase page | `page_nb`                                   | 1               | Erase a page                               
+| 0x81 | rpage      | -                                      | 0               | Reads saved parameter of a page or all pages |
+| 0x82 | Erase page | `page_nb`                              | 1               | Erase a page                                 |
 
 ### Configuration and statistics commands
-| ID   | commands           | Parameters                                                                                  | Data length (B) | Description                                             |
-|------|--------------------|---------------------------------------------------------------------------------------------|--------------------|---------------------------------------------------------|
-| 0xA0 | tdbg               | -                                                                                           | 0                  | Task debugging                                          |
-| 0xA1 | WConfigID          | ConfigID                                                                                    | 8                  | Write config ID                                         |
-| 0xA2 | RConfigID          | config number                                                                               | 1                  | Read config ID                                          |
-| 0xA3 | SetConfigID        | ConfigID                                                                                    | 1                  | Set current config ID to display BMP, layout and font   |
-| 0xA5 | PixelCount         | -                                                                                           | 0                  | Get number of pixel activated on display                |
-| 0xA6 | setPixelValue      | `maxPixelValue (msb1)` `maxPixelValue (msb2)` `maxPixelValue (lsb1)` `maxPixelValue (lsb2)` | 4                  | Set Max Pixel Value                                     |
-| 0xA7 | getChargingCounter | -                                                                                           | 0                  | Get total number of charging cycle                      |
-| 0xA8 | getChargingTime    | -                                                                                           | 0                  | Get total number of charging minute                     |
-| 0xA9 | getMaxPixelValue   | -                                                                                           | 0                  | Get the maximum number of pixel activated               |
-| 0xAA | resetChargingParam | -                                                                                           | 0                  | Reset charging counter and charging time value in Param |
-| 0xAB | getTimeDisplayOn   | -                                                                                           | 0                  | Get time of display ON                                  |
-| 0xAC | resetTimeDisplayOn | -                                                                                           | 0                  | Reset value of time display ON                          |
+| ID   | commands           | Parameters                                         | Data length (B) | Description                                             |
+|------|--------------------|----------------------------------------------------|-----------------|---------------------------------------------------------|
+| 0xA0 | tdbg               | -                                                  | 0               | Task debugging                                          |
+| 0xA1 | WConfigID          | `Config number` `Config Id (4B)` `deprecated (3B)` | 8               | Write config, Config Id is used to track which config is in the device |
+| 0xA2 | RConfigID          | `Config number`                                    | 1               | Read config                                             |
+| 0xA3 | SetConfigID        | `Config number`                                    | 1               | Set current config to display BMP, layout and font      |
+| 0xA5 | PixelCount         | -                                                  | 0               | Get number of pixel activated on display                |
+| 0xA6 | setPixelValue      | `maxPixelValue (msb1)` `maxPixelValue (msb2)` `maxPixelValue (lsb1)` `maxPixelValue (lsb2)` | 4    | Set Max Pixel Value       |
+| 0xA7 | getChargingCounter | -                                                  | 0               | Get total number of charging cycle                      |
+| 0xA8 | getChargingTime    | -                                                  | 0               | Get total number of charging minute                     |
+| 0xA9 | getMaxPixelValue   | -                                                  | 0               | Get the maximum number of pixel activated               |
+| 0xAA | resetChargingParam | -                                                  | 0               | Reset charging counter and charging time value in Param |
 
 ## ActiveLook® commands guide
 
@@ -378,88 +382,205 @@ All shapes included in the graphical commands draw objects with the grey level p
 ### Bitmaps
 
 The graphical functions allow displaying bitmaps. 
-The bitmaps must first be stored in the device with the savebmp command before being displayed.  
+The bitmaps must first be stored in the device with the `savebmp` command before being displayed.  
 A first command defining the bitmap data length in bytes and the bitmap pixel width in pixel must be sent.
 Be careful, bitmap can’t be saved if WConfigID command has not been sent before.
-
-⚠
 
 •	The wconfig Id command is required before any bitmap upload
 
 •	The bitmap data is coded with 4 bits per pixel, and thus each byte defines two adjacent pixels
 
-•	The bitmaps are stored one after another, and are identified with a number (0,1,2…)
+•	A maximum of 128 bitmaps can be stored in configuration 1, 192 in configuration 2.
 
-•	A maximum of 128  bitmaps can be stored in each configuration.
-
-•	The bitmap data is sent in chunks of maximum 128 characters.
-
-•	When all data is updated, a number is sent back through USB to identify the bitmap. 
+•	The bitmap data is sent in chunks of maximum 512 bytes.
 
 •	When sending bitmaps through BLE it is highly recommended to use the WRITE WITH RESPONSE Bluetooth protocol in order to make sure all data is properly saved.
 
 The bitmap data encoding can be implemented with ActiveStudio, a Microoled software running on Windows. A text file is generated with the encoded data to send to the device.
 
-Here is an example of encoded data for a 60 x 60 icon : 
-
-
-<p align="center"><img src="./resources/Stopwatch_icon.png"/</p>
-
-	FF41000B00000708003CAA
-	FF41006900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000AA
-	FF41006900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000AA
-	FF410069000000000000000000000000000000000000000000000000D0DDDDDDDDDDDD00000000000000000000000000000000000000000000DDDDDDDDDDDDDDDDDD0D00000000000000000000000000000000000000DDDDDDDDDDDDDDDDDDDDDD0D000000000000AA
-	FF4100690000000000000000000000DDDDDDDDDDDDDDDDDDDDDDDDDD0D000000000000000000000000000000D0DDDDDDDDDDDDDDDDDDDDDDDDDDDD000000000000000000000000000000DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD0D00000000000000000000000000D0AA
-	FF410069DDDDDDDDDD0D00000000DDDDDDDDDDDD00000000000000000000000000DDDDDDDDDD00000000000000D0DDDDDDDD0D0000000000000000000000D0DDDDDDDD000000000000000000D0DDDDDDDD0000000000000000000000DDDDDDDD0D00000000000000AA
-	FF410069000000DDDDDDDD0D000000000000000000D0DDDDDDCD0000000000000000000000D0DDDDDDDD000000000000000000D0DDDDDD0D000000000000000000000000DDDDDDDD000000000000000000DDDDDDDD0000DDDD000000000000000000D0DDDDDD0D00AA
-	FF41006900000000000000DDDDDD0D00D0DDDD0D000000000000000000DDDDDD0D00000000000000D0DDDDDD0C00D0DDDDDD000000000000000000DEDDDDDD00000000000000D0DDDDDD0000D0DDDDDD0D0000000000000000D0DDDDDD00000000000000DBDDDDCDAA
-	FF4100690000D0DDDDDDDD0000000000000000D0DDDDDD00000000000000DDDDDD0D000000DDDDDDDD0D0000000000000000DDDDDD0D000000000000DDDDDD0D000000D0DDDDDDDD0000000000000000DDDDDD0D000000000000DDDDDD0D00000000DDDDDDDD0D00AA
-	FF410069000000000000DDDDDD0D000000000000DDDDDD0C00000000D0DDDDDDDD00000000000000DDDDDD0D000000000000DDDDDD0F0000000000DDDDDDDD0D000000000000DDDDDD0D000000000000DDDDDD000000000000D0DDDDDD0D000000000000DDDDDD0DAA
-	FF410069000000000000DDDDDD0F000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0C000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0DAA
-	FF410069000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0D000000000000DDDDDD0D000000000000D0DDDDDD000000000000DDDDDD0D0000000000D0DDDDDD00000000000000D0DDDDDD000000000000DDDDDD0DAA
-	FF4100690000000000D0DDDDDD00000000000000D0DDDDDD0C0000000000DDDDDD0D0000000000DDDDDDCD0000000000000000DDDDDD0D0000000000DDDDDD0D0000000000DDDDDD0D0000000000000000DDDDDDDD0000000000DDDDDD0D00000000D0DDDDDD0C00AA
-	FF41006900000000000000D0DDDDDD0D00000000DFDDDD0000000000DDDDDDDD000000000000000000F0DDDDDDDD00000000D0DDDD00000000D0DDDDDD0D00000000000000000000DDDDDDDD0D00000000B00000000000DDDDDDDD0D00000000000000000000D0DDAA
-	FF410069DDDDDD0F0000000000000000DCDDDDDDDD000000000000000000000000DDDDDDDDDD0F000000000000DFDDDDDDDD0D000000000000000000000000D0DDDDDDDDDDFD000000F0DDDDDDDDDDDD0000000000000000000000000000DDDDDDDDDDDDDDDDDDDDAA
-	FF410069DDDDDDDDDD0D0000000000000000000000000000D0DDDDDDDDDDDDDDDDDDDDDDDDDDDD00000000000000000000000000000000DDDDDDDDDDDDDDDDDDDDDDDDDD0F0000000000000000000000000000000000DDDDDDDDDDDDDDDDDDDDDD0D000000000000AA
-	FF41006900000000000000000000000000DDDDDDDDDDDDDDDDDD0C000000000000000000000000000000000000000000C0DDDDDDDDDDDD00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000AA
-	FF41006900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000AA
-	FF41006900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000AA
-
-
 Once stored, it is possible to display the bitmap with the bitmap command. 
 
 At any moment it is possible to retrieve the list of the saved bitmap with the bmplist command.
 
-### Saving Bitmap
+### Saving Bitmap, 4 bits per pixel
 
-There are 2 ways to save bitmap. The first method consists in saving bitmap by sending bitmap data with 4 bit per pixel (example of command can be found in the previous part) The second one consists in saving bitmap by sending bitmap data with 1 bit per pixel. The ID of this new command is `0x45`. For example, a 32x32 bitmap can be saved as :
+The command ID `0x41` is used to save image with 4bpp.
 
-	FF45000F000002000020AA  (1st chunk with size and width parameters)
-	FF450015FFFF0000FFFF0000FFFF0000FFFF0000AA  (2nd chunk with 4 lines data)
-	FF450015FFFF0000FFFF0000FFFF0000FFFF0000AA
-	FF450015FFFF0000FFFF0000FFFF0000FFFF0000AA
-	FF450015FFFF0000FFFF0000FFFF0000FFFF0000AA
-	FF4500150000FFFF0000FFFF0000FFFF0000FFFFAA
-	FF4500150000FFFF0000FFFF0000FFFF0000FFFFAA
-	FF4500150000FFFF0000FFFF0000FFFF0000FFFFAA
-	FF4500150000FFFF0000FFFF0000FFFF0000FFFFAA  (last chunk with 4 latest lines data)
+⚠ The wconfig Id command is required before any bitmap upload
+
+First, 4bpp image size in bytes and image width in pixels must be sent.  
+If the image has an odd width, each line must be finished with a dummy pixel (4bit) included in the size.  
+
+Example with 15 x 10 image: 
+
+| FF       | 41         | 00         | 0B           | -        | 00000050000F                | AA     |
+|----------|------------|------------|--------------|----------|-----------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
+
+Data Parsing:
+
+| 4bpp image size in bytes        | image width      |
+|---------------------------------|------------------|
+| `0x00 0x00 0x00 0x50`           | `0x00 0x0F`      |
+| 80 bytes, 10 lines of 16 pixels | 15 pixels        |
+
+<br/>
+
+After, the image data must be sent with 4pp compression.  
+Example of 4bpp compression for 5 pixels:
+
+|      pixel number      |   1  |   2  |   3  |   4  |   5  | dummy |
+|:----------------------:|:----:|:----:|:----:|:----:|:----:|:-----:|
+| **pixel value (8bit)** |   0  |  32  |  64  |  128 |  255 |   NA  |
+| **pixel value (4bit)** |   0  |   2  |   4  |   8  |  15  |   NA  |
+|        **bytes**       | <span style="color:blue">0xX0</span> | <span style="color:blue">0x2X</span> | <span style="color:green">0xX4</span> | <span style="color:green">0x8X</span> | <span style="color:red">0xXF |  <span style="color:red">0x0X</span> |
+|        **frame**       | 0x20 |      | 0x84 |      | 0x0F |
+
+Example of compression loop in python:
+``` python
+## compress img into 4bpp
+frame = []
+for i in range(height):
+	byte = 0
+	shift = 0
+	for j in range(width):
+		## convert 8bpp to 4bpp
+		pxl = round(gray[i,j] / 17)
+
+		## compress 4bpp
+		byte += pxl << shift
+		shift += 4
+		if shift == 8:
+			frame.append(byte)
+			byte = 0
+			shift = 0
+	if shift != 0:
+		frame.append(byte)
+```
+
+<br/>
+
+Data are sent in chunk of 512 bytes with command Id `0x41`  
+Example for a 15 x 10 image:  
+``` python
+## write config 1
+0xFFA1000D0100000000000000AA
+## save image, 80 bytes, 15 pixel width
+0xFF41000B00000050000FAA
+## image data, 10 lines of 8 bytes
+0xFF410055113243557688A90A213244657798A90B214354668798BA0B3243557688A9BA0C3244657798A9BB0C4354668798BACB0D43657688A9BACC0D44657798A9BBDC0E54668798BACBDD0E657688A9BACCED0EAA
+```
+
+### Saving Bitmap, 1 bits per pixel
+
+To reduce image transfer time, images can also be sent with 1bpp compression via command Id `0x45`.  
+
+⚠ The wconfig Id command is required before any bitmap upload
+
+First, 1bpp image size in bytes and image width in pixels must be sent.  
+If the image width is not a multiple of 8, each line must be finished with dummies pixels included in the size.  
+
+Example with 15 x 10 image: 
+
+| FF       | 45         | 00         | 0B           | -        | 00000014000F                | AA     |
+|----------|------------|------------|--------------|----------|-----------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
+
+Data Parsing:
+
+| 1bpp image size in bytes        | image width      |
+|---------------------------------|------------------|
+| `0x00 0x00 0x00 0x14`           | `0x00 0x0F`      |
+| 20 bytes, 10 lines of 16 pixels | 15 pixels        |
+
+<br/>
+
+After, the image data must be sent with 1pp compression.  
+Example of 1bpp compression for 5 pixels:
+
+|      pixel number      |      1     |      2     |      3     |      4     |      5     |    dummies |
+|:----------------------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| **pixel value (8bit)** |      0     |     32     |     64     |     128    |     255    |     NA     |
+| **pixel value (1bit)** |      0     |      1     |      1     |      1     |      1     |     NA     |
+|        **byte**        | 0bXXXXXXX0 | 0bXXXXXX1X | 0bXXXXX1XX | 0bXXXX1XXX | 0bXXX1XXXX | 0b000XXXXX |
+|        **frame**       | 0x1E     
+
+
+Example of compression loop in python:
+``` python
+## compress img 1 bit per pixel
+frame = []
+for i in range(height):
+	byte = 0
+	shift = 0
+	line = []
+	for j in range(width):
+		## convert gray8bit in gray1bit
+		if (gray[i,j] > 0):
+			pxl = 1
+		else:
+			pxl = 0
+
+		## compress 1bpp
+		byte += pxl << shift
+		shift += 1
+		if shift == 8:
+			line.append(byte)
+			byte = 0
+			shift = 0
+	if shift != 0:
+		line.append(byte)
+	frame.append(line)
+```
+
+<br/>
+
+Data are sent in chunk of 512 bytes with command Id `0x45`  
+A line can't be truncate between two chunks. Each chunk must contain only complete lines.  
+
+Example for a 15 x 10 image:  
+``` python
+## write config 1
+0xFFA1000D0100000000000000AA
+## save image, 20 bytes, 15 pixel width
+0xFF45000B00000014000FAA
+## image data, 10 lines of 2 bytes
+0xFF450019C001300608080410022001400140814062211C1EAA
+```
 
 ### Streaming Bitmap
 
+It is also possible to stream images on display without saving them in memory with command Id `0x44`. 
+This method is based on the same principle used to save bitmaps with 1 bit per pixel (a method with 4 bit per pixel would require transferring too much data).  
 
-It is also possible to stream images on display without saving them in memory. This method is based on the same principle used to save bitmaps by sending bitmap data with 1 bit per pixel (a method with 4 bit per pixel would take too much time). The ID of this new command is `0x44`. For example, stream a 32x32 bitmap can be done as follows :
+First, 1bpp image size in bytes, image width in pixels, x/y coordinate must be sent.  
+If the image width is not a multiple of 8, each line must be finished with dummy pixels included in the size.  
 
-	FF44000F00000200002000500050AA  (1st chunk with size width, X and Y position parameters)
-	FF440015FFFF0000FFFF0000FFFF0000FFFF0000AA   (2nd chunk with 4 lines data)
-	FF440015FFFF0000FFFF0000FFFF0000FFFF0000AA
-	FF440015FFFF0000FFFF0000FFFF0000FFFF0000AA
-	FF440015FFFF0000FFFF0000FFFF0000FFFF0000AA
-	FF4400150000FFFF0000FFFF0000FFFF0000FFFFAA
-	FF4400150000FFFF0000FFFF0000FFFF0000FFFFAA
-	FF4400150000FFFF0000FFFF0000FFFF0000FFFFAA
-	FF4400150000FFFF0000FFFF0000FFFF0000FFFFAA  (last chunk with 4 latest lines data)
+Example with 15 x 10 image: 
 
+| FF       | 44         | 00         | 0F           | -        | 00000014000F00320050        | AA     |
+|----------|------------|------------|--------------|----------|-----------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
 
+Data Parsing:
+
+| 1bpp image size in bytes        | image width      | x           | y           |
+|---------------------------------|------------------|-------------|-------------|
+| `0x00 0x00 0x00 0x14`           | `0x00 0x0F`      | `0x00 0x32` | `0x00 0x50` |
+| 20 bytes, 10 lines of 16 pixels | 15 pixels        | x = 50      | y = 80      |
+
+<br/>
+
+Data are sent in chunk of 512 bytes with command Id `0x44`  
+A line can't be truncate between two chunks. Each chunk must contain only complete lines. 
+
+For example, a 15x10 bitmap can be done as follows :
+``` python
+## 20 bytes, 15 pixel width, x = 50, y = 80
+0xFF44000F00000014000F00320050AA
+## image data, 10 lines of 2 bytes
+0xFF440019C001300608080410022001400140814062211C1EAA
+```
 
 ### Coordinates
 
@@ -506,7 +627,7 @@ The shift command does NOT change the graphical elements already present on disp
 
 The text is displayed using encoded fonts. A font is selected with the “txt” command or font command.
 By default, 3 fonts are stored in the device. The size of these fonts is 24, 36 and 48 in the respective font space 1,2 and 3.
-Fonts can be uploaded in the board using the “savefont” command.
+Fonts can be uploaded in the device using the “savefont” command.
 Be careful, fonts can’t be saved if WConfigID command has not been sent.
 
 
@@ -578,7 +699,7 @@ Syntax of “savefont” command, saving the font 4 in memory, of size 430 and c
 	13th chunk: 0xFF 0x51 0x00 0x11 0x21 0x31 0x21 0x22 0x32 0x11 0x61 0x21 0x31 0x33 0xF0 0x80 0xAA
 
 	
-The “fontlist” command allows retrieving a list of the fonts saved in the board and their respective size.
+The “fontlist” command allows retrieving a list of the fonts saved in the device and their respective size.
 The “erasefont” command allows erasing a user updated font. 
 The fonts 1,2 and 3 are defined in the ActiveLook® device by default. The User can update them. If the user erases one of these fonts, the default one is used instead.
 
@@ -606,7 +727,7 @@ If the layout data are stored in flash memory, they will be automatically displa
 |     8    | -                  | Reserved                                                      |
 |     9    | Firmware update    | Firmware update ongoing screen                                |
 
-The system layouts are predefined and stored in the board, these layouts can be modified or erased.
+The system layouts are predefined and stored in the device, these layouts can be modified or erased.
 
 **Information Layout**
 
@@ -644,7 +765,7 @@ Here are layout data definitions:
 If additional graphical commands are needed, the size in terms of bytes of these commands is stored in the size parameter. The additional commands are identified as below, followed with the command parameters, 
 The element positions are all referenced from the layout clipping region (X0, Y0)  :
 
-| Command | Id | Parameter length (B) |                  Parameters bytes                 |
+| Command | Id | Parameter length (B)     |                  Parameters bytes                 |
 |:-------:|----|:------------------------:|:-------------------------------------------------:|
 |  bitmap |  0 |             5            |           bmpNb x0Msb x0lsb y0msb y0lsb           |
 |   circ  |  1 |             6            |         x0Msb x0lsb y0msb y0lsb Rmsb Rlsb         |
@@ -657,6 +778,8 @@ The element positions are all referenced from the layout clipping region (X0, Y0
 |  rectf  |  8 |             8            |  x0Msb x0lsb y0msb y0lsb x1Msb x1lsb y1msb y1lsb  |
 |   text  |  9 |            6…            | x0Msb x0lsb y0msb y0lsb lengthofstr string(ASCII) |
 |  gauge  | 10 |            1             |                    Gauge number                   |
+
+⚠  If the layout use a gauge, the gauge value will come from the text provided in the layout command (0x62)
 
 If graphical elements of a layout are outside the clipping area, they will be cropped and they won’t be displayed on screen.
 
@@ -742,9 +865,9 @@ Exemple : `0xFF 0x63 0x00 0x06 0x0D 0xAA`
 
 A set of layout of predefined layouts is present in the ActiveLook® device by default, these layouts use a set of default bitmap and font and are used by the ActiveLook® smart application to display information. This profile can be modified or updated  by the user.
 
-| Layout # | Name                |                                            command                                           |
-|----------|---------------------|:--------------------------------------------------------------------------------------------:|
-|    10    | time                |`0x0A000008E8004BFF0F0001010046FE0401`                                                        |
+| Layout # | Name                |                                            command                                             |
+|----------|---------------------|:----------------------------------------------------------------------------------------------:|
+|    10    | time                | `0x0A000008E8004BFF0F0001010046FE0401`                                                         |
 |    11    | chrono              | `0x0B06001E910112CD0F00030100C8C50401000100D10093`                                             |
 |    12    | Distance            | `0x0C10001E550112910F00030100C3860401000400D10056040109005C0072024B4D`                         |
 |    13    | Speed               | `0x0D12001E550112910F00030100C3860401000200D1005604010900610072044B4D2F48`                     |
@@ -781,40 +904,65 @@ Once the gauge parameters are set and saved. It is possible to display the gauge
 
 <p align="center"><img src="./resources/ActiveLook_gauge_3.png"/</p>
 
-	Example:
-	
-	0xFF 0x71 0x00 0x11 0x01 0x00 0x97 0x00 0x7F 0x00 0x6E 0x00 0x4B 0x0D 0x0E 0x00 0xAA
-	
-	
-	will save gauge 1
-	
-	0xFF 0x71 0x00 0x11 0x01 0x00 0x97 0x00 0x7F 0x00 0x6E 0x00 0x4B 0x0D 0x0E 0x00 0xAA
-	
-	which will be in the middle of the screen (x=151, y=127),
-	
-	0xFF 0x71 0x00 0x11 0x01 0x00 0x97 0x00 0x7F 0x00 0x6E 0x00 0x4B 0x0D 0x0E 0x00 0xAA
-	
-	of external radius 110 pixels, and internal radius 75, of half a circle (start=13, end=4), clockwise
-	
-	0xFF 0x71 0x00 0x11 0x01 0x00 0x97 0x00 0x7F 0x00 0x6E 0x00 0x4B 0x0D 0x0E 0x00 0xAA
-	
-	of half a circle (start=13, end=4), clockwise
-	
-	0xFF 0x71 0x00 0x11 0x01 0x00 0x97 0x00 0x7F 0x00 0x6E 0x00 0x4B 0x0D 0x04 0x00 0xAA
+Example:
+
+Save gauge: `0xFF710011010097007F006E004B030E01AA`
+
+Frame parsing: 
+
+| FF       | 71         | 00         | 11           | -        | 010097007F006E004B030E01    | AA     |
+|----------|------------|------------|--------------|----------|-----------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
+
+Data Parsing:
+
+| Gauge number (1) | x (151)     |  y (127)    | rExt (110)  | rIn (75)    | first portion (3) | last portion (14) | clockwise |
+|------------------|-------------|-------------|-------------|-------------|--------------------|------------------|-----------|
+|`0x01`            | `0x00 0x97` | `0x00 0x7F` | `0x00 0x6E` | `0x00 0x4B` | `0x03`             | `0x0E`           | `0x01`    |
+
+The frame will save gauge 1, in the middle of the screen (x=151, y=127), of external radius 110 pixels, and internal radius 75, start segment 3, end segment 14, clockwise.
+
+Display Gauge 1, 85%: `0xFF7000070155AA`
+
+| FF       | 70         | 00         | 07           | -        | 0155         | AA     |
+|----------|------------|------------|--------------|----------|--------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Gauge 1, 85% | End ID |
 
 
+Once its parameters defined, a gauge can be included in a layout as an additional command, allowing to display the value in the center.
 
-There are defaults parameters for the 1rs gauge, so it can be used directly by sending the command `0xFF 0x70 0x00 0x07 0x01 0x50 0xAA`. Byte 0x50 is the value of gauge.
+Save Layout: `0xFF63001F1409000000012FE60F00020100AF8704010A0109007800870125AA`
 
-Once its parameters defined, a gauge can be included in a layout as an additional command, allowing to display the value in the center for instance:
-`0xFF63001F1409000000012FE60F00020100AF8704010A0109007800870125AA`
+Frame parsing: 
 
-here is the result with the command  `0xFF6200071455AA`
+| FF       | 63         | 00         | 1F           | -        | 1409000000012FE60F00020100AF8704010A0109006C00870125 | AA     |
+|----------|------------|------------|--------------|----------|------------------------------------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                                                 | End ID |
+
+Data Parsing:
+
+| Layout Id (20) | additional command length (9) |  x (0)      | y (0)  | x size (303) | y size (230) | fore color (15)  | back color (0) | font (2) | use text (True) | text x (175) | text y (135) | text rotation (4) | text opacity (1) | additional command     |
+|----------------|-------------------------------|-------------|--------|--------------|--------------|------------------|----------------|----------|-----------------|--------------|--------------|-------------------|------------------|------------------------|
+| `0x14`         | `0x09`                        | `0x00 0x00` | `0x00` | `0x01 0x2F`  | `0xE6`       | `0x0F`           | `0x00`         | `0x02`   | `0x01`          | `0x00 0xAF`  | `0x87`       | `0x04`            | `0x01`           | `0x0A0109006C00870125` |
+
+Additional command Parsing:
+| command (gauge) | gauge number (1) | command (text) | text x (108) | text y (135) | text length (1) | text ('%') |
+|-----------------|------------------|----------------|--------------|--------------|-----------------|------------|
+| `0x0A`          | `0x01`           | `0x09`         | `0x00 0x6C`  | `0x00 0x87`  | `0x01`          |  `0x25`    |
+
+Here is the result with the command
+
+Display layout: `0xFF62000914835500AA`
+
+Frame parsing: 
+| FF       | 62         | 00         | 09           | -        | 14383500            | AA     |
+|----------|------------|------------|--------------|----------|---------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | id (20) text ('85') | End ID |
 
 
 <p align="center"><img src="./resources/ActiveLook_gauge_4.png"/</p>
 
-###Page
+### Page
 
 Pages are defined as a set of layouts to be displayed together on the screen. Usually a layout is used to display a certain type of information, for instance, the speed or the time. Depending on the application and on user settings different layouts can be displayed in a page. 
 
@@ -841,7 +989,7 @@ and includes the layout 12 and 19 :
 
 
 -	rpage : `0xFF 0x81 0x00 0x05 0xAA`
-command will return a string for each page saved in the board as below :
+command will return a string for each page saved in the device as below :
 
 Response :
 `0x00040C13` : page 0, orientation 4, layout 12 and 19
@@ -856,57 +1004,69 @@ Response :
 
 ### Battery Level
 
-Command to send = `0xFF05040911223344A`
-
-Sending : `0xFF05040911223344AA` 
+Command to send : `0xFF05040911223344AA`
 
 Response : `0xFF05040A1122334464AA`
 
-1rst frame parsing: 
+Frame parsing: 
 
 | FF       | 05         | 04         | 0A           | 11223344 | 64                          | AA     |
 |----------|------------|------------|--------------|----------|-----------------------------|--------|
-| Start ID | Command ID | Cmd Format | Trame length | Query ID | Battery level (0x64 = 100%) | End ID |
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Battery level (0x64 = 100%) | End ID |
 
 ### Version
 
-Command to send =`0xFF06040911223344AA` 
-
-Sending : `0xFF06040911223344AA`
+Command to send : `0xFF06040911223344AA` 
 
 Response : `0xFF0604121122334403050062120B000002AA`
 
-1rst frame parsing: 
+Frame parsing: 
 
 | FF       | 06         | 04         | 12           | 11223344 | 03050062120B000002 | AA     |
 |----------|------------|------------|--------------|----------|--------------------|--------|
-| Start ID | Command ID | Cmd Format | Trame length | Query ID | data               | End ID |
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | data               | End ID |
 
 Data Parsing:
 
 | Firmware version (3.5.0b) | Year/Week |     Number     |
-|:-------------------------:|:---------:|:--------------:|
-|`0x03 0x05 0x00 0x62`       | `0x12 0x0B` | `0x00 0x00 0x02` |
+|---------------------------|-----------|----------------|
+|`0x03 0x05 0x00 0x62`      | `0x12 0x0B` | `0x00 0x00 0x02` |
+
+### GetSensorParameters
+
+Command to send : `0xFF240005AA` 
+
+Response : `0xFF24001B003200FA03E80BB81770232827102EE03A9800640014AA`
+
+Frame parsing: 
+
+| FF       | 24         | 00         | 1B           | -        | 003200FA03E80BB81770232827102EE03A9800640014 | AA     |
+|----------|------------|------------|--------------|----------|----------------------------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | data                                         | End ID |
+
+Data Parsing:
+
+| AlsLum[0] (50) | AlsLum[1] (250) | AlsLum[2] (1000) | AlsLum[3] (3000) | AlsLum[4] (6000) | AlsLum[5] (9000) | AlsLum[6] (10000) | AlsLum[7] (12000) | AlsLum[38 (15000) | Als Period (100) | Range Period (20) |
+|----------------|-----------------|------------------|------------------|------------------|------------------|-------------------|-------------------|-------------------|------------------|-------------------|
+| `0x00 0x32`    | `0x00 0xFA`     | `0x03 0xE8`      | `0x0B 0xB8`      | `0x17 0x70`      | `0x23 0x28`      | `0x27 0x10`       | `0x2E 0xE0`       | `0x3A 0x98`       |   `0x00 0x64`    |  `0x00 0x14`      | 
 
 ### Rpage
 
-Command to send =`0xFF81000911223344AA` 
-
-Sending : `0xFF81000911223344AA` 
+Command to send : `0xFF81000911223344AA` 
 
 Response : `0xFF81041D00040B0D0E00FF01040B0C1300FF02040B150FF00AA`
 
-1rst frame parsing: 
+Frame parsing: 
 
 | FF       | 81         | 04         | 1D           | 11223344 | 00040B0D0E00FF01040B0C1300FF02040B150FF00 | AA     |
 |----------|------------|------------|--------------|----------|-------------------------------------------|--------|
-| Start ID | Command ID | Cmd Format | Trame length | Query ID | 1rst part of the data                      | End ID |
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | 1rst part of the data                      | End ID |
 
 ### Settings
 
-Command to send = settings `query ID`
+Command parameters : settings `query ID`
 
-Sending : `0xFF0A040911223344AA` 
+Command to send : `0xFF0A040911223344AA` 
 
 Response :`0xFF0A0412233440E0000070101AA`
 
@@ -932,7 +1092,7 @@ Command to send = bmplist `query ID`
 
 Example :
 
-Sending :`0xFF40040911223344AA`
+Command to send : `0xFF40040911223344AA`
 
 Response : `0xFF40042D11223344003c003c000e001e000e` | [..] | `003c003c003c003c003caaaaaa`
 
@@ -978,34 +1138,40 @@ Note : There can only be 1 « dynamic text » in each layout, but several non-ed
 
 The description, location and size of each parameters is described in the following table :
 
-*Fixed part*
+*Fixed part :*
+| Parameter        | Description                                   |
+|------------------|-----------------------------------------------|
+| ID               | Layout number 0..59 (1B)                      |
+| Size             | Variable part size in byte (1B)               |
+| X0               | X0 coordinate of the « clipping region » (2B) |
+| Y0               | Y0 coordinate of the « clipping region » (1B) |
+| X1               | X1 coordinate of the « clipping region » (2B) |
+| Y1               | Y1 coordinate of the « clipping region » (1B) |
+| Text opacity     | Opacity for the dynamic text (1B)             |
+| Fore color       | Fore color of the region (1B)                 |
+| Back color       | Back color of the region (1B)                 |
+| Font             | Font of the region (1B)                       |
+| Text valid       | Enable/disable dynamic text (1B)              |
+| Text X           | X coordinate of the dynamic text (2B)         |
+| Text Y           | Y coordinate of the dynamic text (1B)         |
+| Text orientation | Dynamic text orientation (1B)                 |
+| Text opacity     | Opacity for the dynamic text (1B)             |
 
-| ID                           | Size                                | X0                                                 | Y0                                                | X1                                                 | Y1                                                | Text opacity                          |
-|------------------------------|-------------------------------------|----------------------------------------------------|---------------------------------------------------|----------------------------------------------------|---------------------------------------------------|---------------------------------------|
-| Layout number 0..59 (1B) | Variable part size in byte (1B) | X0 coordinate of the « clipping region » (2B) | Y0 coordinate of the « clipping region » (1B) | X1 coordinate of the « clipping region » (2B) | Y1 coordinate of the « clipping region » (1B) | Opacity for the dynamic text (1B) |
-|                              |                                     |                                                    |                                                   |                                                    |                                                   |                                       |
+*Variable part :* 
 
-| Fore color                        | Back color                        | Font                        | Text valid                       | Text X                                      | Text Y                                    | Text orientation                  | Text opacity                          |
-|-----------------------------------|-----------------------------------|-----------------------------|----------------------------------|--------------------------------------------|--------|-------------------------------------------|-----------------------------------|---------------------------------------|
-| Fore color of the region (1B) | Back color of the region (1B) | Font of the region (1B) | Enable/disable dynamic text (1B) | X coordinate of the dynamic text (2B) | Y coordinate of the dynamic text (1B) | Dynamic text orientation (1B) | Opacity for the dynamic text (1B) |
-
-Variable part :
-In the following table, starting from the « ID » column, each fill table cell is 1 byte.
-Some values are encoded on 2 bytes or more, it is represented by the same name in the same line (MSB is always first). Example : for the bitmap, X and Y coordinates are each on 2 bytes.
-
-| Graphic element | ID | Graphical Element composition |                           |    |    |             |                    |    |    |
-|-----------------|:--:|:-----------------------------:|:-------------------------:|:--:|:--:|:-----------:|:------------------:|:--:|:--:|
-| Bitmap          |  0 | N° bitmap                     | X0                        | X0 | Y0 | Y0          |                    |    |    |
-| Circle          |  1 | X0                            | X0                        | Y0 | Y0 | R0          | R0                 |    |    |
-| Circle full     |  2 | X0                            | X0                        | Y0 | Y0 | R0          | R0                 |    |    |
-| Grey level      |  3 | Color level                   |                           |    |    |             |                    |    |    |
-| Font            |  4 | Font size                     |                           |    |    |             |                    |    |    |
-| Line            |  5 | X0                            | X0                        | Y0 | Y0 | X1          | X1                 | Y1 | Y1 |
-| Point           |  6 | X0                            | X0                        | Y0 | Y0 |             |                    |    |    |
-| Rectangle       |  7 | X0                            | X0                        | Y0 | Y0 | X1          | X1                 | Y1 | Y1 |
-| Rectangle full  |  8 | X0                            | X0                        | Y0 | Y0 | X1          | X1                 | Y1 | Y1 |
-| Text            |  9 | X0                            | X0                        | Y0 | Y0 | Text length | Text (HEX format)  |    |  |
-| Gauge           | 10 | Gauge number                  | Value (in %) `0x00..0x64` |    |    |             |                    |    |    |
+| Command | ID |                  Parameters bytes                 |
+|---------|----|---------------------------------------------------|
+|  bitmap |  0 |           bmpNb x0Msb x0lsb y0msb y0lsb           |
+|   circ  |  1 |         x0Msb x0lsb y0msb y0lsb Rmsb Rlsb         |
+|  circf  |  2 |         x0Msb x0lsb y0msb y0lsb Rmsb Rlsb         |
+|  color  |  3 |                       Color                       |
+|   font  |  4 |                        Font                       |
+|   line  |  5 |  x0Msb x0lsb y0msb y0lsb x1Msb x1lsb y1msb y1lsb  |
+|  point  |  6 |              x0Msb x0lsb y0msb y0lsb              |
+|   rect  |  7 |  x0Msb x0lsb y0msb y0lsb x1Msb x1lsb y1msb y1lsb  |
+|  rectf  |  8 |  x0Msb x0lsb y0msb y0lsb x1Msb x1lsb y1msb y1lsb  |
+|   text  |  9 | x0Msb x0lsb y0msb y0lsb lengthofstr string(ASCII) |
+|  gauge  | 10 |                    Gauge number                   |
 
 
 ## UI design: Good practices
@@ -1080,13 +1246,13 @@ In order to simplify the use of graphical elements, it is possible to save a lis
 
 
 
-Pages are defined as a set of layouts to be displayed together on the screen. Usually a layout is used to display a certain type of information, for instance, the speed or the time. Depending on the application and on user settings different layouts can be displayed in a page. The page commands allow saving user settings in board and to retrieve them for the application.
+Pages are defined as a set of layouts to be displayed together on the screen. Usually a layout is used to display a certain type of information, for instance, the speed or the time. Depending on the application and on user settings different layouts can be displayed in a page. The page commands allow saving user settings in device and to retrieve them for the application.
 
 
 ## Credit
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
-This documentation supports the ActiveLook Firmware version *3.6.3.b*
+This documentation supports the ActiveLook Firmware version *3.7.1b*
 
 ## Support
 Reach out to the ActiveLook® team at one of the following places:
