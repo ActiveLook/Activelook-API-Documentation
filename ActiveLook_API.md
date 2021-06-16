@@ -338,7 +338,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x01 | clear     | -                         | 0                  | Clear the display memory (black screen)                      |
 | 0x02 | grey      | `u8 lvl`                  | 1                  | Set the whole display to the corresponding grey level (0 to 15) |
 | 0x03 | demo      | `u8 demo_id`              | 1                  | Display demonstration:<br>0: Fill screen<br>1: Rectangle with a cross in it<br>2: display saved images, call multiple time to go through all saved images |
-| 0x04 | setTimers | `u8 timer_id`<br>`u16 duration` | 3                  | Change timer duration:<br>timer 0: Touch duration to trigger a boot<br>timer 1: touch duration for shutdown<br>timer 2: reserved |
+| 0x04 | setTimers | `u8 timer_id`<br>`u16 or u32 duration` | 3 or 5 | Change timer duration:<br>timer 0: Touch duration to trigger a boot. Value: 1 to 65 535 ms<br>timer 1: touch duration for shutdown. Value: 1 to 65 535 ms<br>timer 2: reserved<br>timer 3: Delay before power down when no connection established. Value: 0 (disable) to 4 294 967 295 ms |
 | 0x05 | battery   | -                         | 0                  | Get the battery level in %                                   |
 | 0x06 | vers      | -                         | 0                  | Get the device ID and firmware version                       |
 | 0x08 | led       | `u8 state`                | 1                  | Set green LED:<br>0: Off<br>1: On<br>2: Toggle<br>3: Blinking |
@@ -1260,7 +1260,8 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 ##  7. <a name='Credit'></a>Credit
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
-This documentation supports the ActiveLook Firmware version *4.0.1b*
+This documentation supports the ActiveLook Firmware version *4.0.1b*  
+Document version "fw-4.0.1_doc-revB"  
 
 ##  8. <a name='Support'></a>Support
 Reach out to the ActiveLook® team at one of the following places:
