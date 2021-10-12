@@ -24,9 +24,9 @@ Most of the commands are very simple and allows you to draw a combination of bas
 
 ## Content
 
-[ActiveLook® Programming Interface Documentation](ActiveLook_API.md)
+[ActiveLook® Programming Interface Documentation](ActiveLook_API.md)  
 
-[Default Bitmaps](ActiveLook_Default_Bitmaps.md)
+[ActiveLook® visual assets](https://github.com/ActiveLook/Activelook-Visual-Assets)  
 
 ## Reach Us
 
