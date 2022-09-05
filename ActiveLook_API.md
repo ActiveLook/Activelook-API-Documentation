@@ -1,8 +1,3 @@
-<!-- vscode-markdown-toc-config
-	numbering=true
-	autoSave=true
-	/vscode-markdown-toc-config -->
-
 # ActiveLook® Programming Interface 
 
 <p align="center"> <img src="./resources/ActiveLook_components.png"/ </p>
@@ -45,7 +40,7 @@
 	* 5.5. [Images](#Images)
 		* 5.5.1. [Saving Image, 4 bits per pixel](#SavingImage4bitsperpixel)
 		* 5.5.2. [Saving Image, 1 bit per pixel](#SavingImage1bitperpixel)
-		* 5.5.3. [Saving image with Heatshrink compression](#SavingimagewithHeatshrikcompression)
+		* 5.5.3. [Saving image with Heatshrink compression](#SavingimagewithHeatshrinkcompression)
 		* 5.5.4. [Streaming Image](#StreamingImage)
 		* 5.5.5. [Coordinates](#Coordinates)
 	* 5.6. [Animation](#Animation)
@@ -71,6 +66,11 @@
 	* 6.8. [Layouts and Pages](#LayoutsandPages)
 * 7. [Credit](#Credit)
 * 8. [Support](#Support)
+
+<!-- vscode-markdown-toc-config
+	numbering=true
+	autoSave=true
+	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 
 ##  1. <a name='Introduction'></a>Introduction
@@ -412,7 +412,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x35 | circ       | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw an empty circle at the corresponding coordinates                    |
 | 0x36 | circf      | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw a full circle at the corresponding coordinates                      |
 | 0x37 | txt        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`u8 f`<br>`u8 c`<br>`str string[255]` | >= 8            | Write text `string` at coordinates (x,y) with rotation, font size, and color |
-| 0x38 | polyline   | `s16 x0`<br>`s16 y0`<br>...<br>`s16 xN`<br>`s16 yN` | (n + 1) * 4     | Draw multiple connected lines at the corresponding coordinates |
+| 0x38 | polyline   | `u8 thickness`<br>`u8 reserved`<br>`u8 reserved`<br>`s16 x0`<br>`s16 y0`<br>...<br>`s16 xN`<br>`s16 yN` | 3 + (n + 1) * 4     | Draw multiple connected lines at the corresponding coordinates. Thickness is set for all lines.<br> `Backward compatibility`: The first 3 bytes can be omitted. The length should be equal to (n + 1) * 4. In these case, thickness is equal to 1.|
 | 0x39 | holdFlush  | `u8 action`                                  | 1               | Hold or flush the graphic engine.<br>When held, new display commands are stored in memory and are displayed when the graphic engine is flushed.<br>This allows stacking multiple graphic operations and displaying them simultaneously without screen flickering.<br>The command is nested, the `flush` must be used the same number of times the `hold` was used<br>`action` = 0 : Hold display<br>`action` = 1 : Flush display<br>⚠ `clear` is not held by the graphic engine, a white rectangle can be used instead. |
 
 
@@ -422,9 +422,9 @@ If the string length is shorter than the maximum length. The string must be NUL 
 
 | ID   | commands    | Parameters                             | Data length (B)         | Description                                                     |
 |------|-------------|----------------------------------------|-------------------------|-----------------------------------------------------------------|
-| 0x41 | imgSave     | `u8 id`<br>`u32 size`<br>`u16 width`<br>`u8 format` | 8 for the first chunk | Save an image of `size` bytes and `width` pixels<br>Save image according to `format`:<br>- 0x00: 4bpp<br>- 0x01: 1bpp, transformed into 4bpp by the firmware before saving<br>- 0x02: 4bpp with Heatshrink compression, decompressed into 4bpp by the firmware before saving |
+| 0x41 | imgSave     | `u8 id`<br>`u32 size`<br>`u16 width`<br>`u8 format` | 8 for the first chunk | Save an image of `size` bytes and `width` pixels<br>Save image according to `format`:<br>- 0x00: 4bpp<br>- 0x01: 1bpp, transformed into 4bpp by the firmware before saving<br>- 0x02: 4bpp with Heatshrink compression, decompressed into 4bpp by the firmware before saving<br>- 0x03: 4bpp with Heatshrink compression, stored compressed, decompressed into 4bpp before display |
 | 0x42 | imgDisplay  | `u8 id`<br>`s16 x`<br>`s16 y`          | 5                       | Display image `id` to the corresponding coordinates<br>Coordinates are signed, they can be negative |
-| 0x44 | imgStream   | `u32 size`<br>`u16 width`<br>`s16 x`<br>`s16 y` | 10 for the first chunk | Stream 1bpp bitmap image on display without saving it in memory |
+| 0x44 | imgStream   | `u32 size`<br>`u16 width`<br>`s16 x`<br>`s16 y`<br>`u8 format` | 11 for the first chunk | Stream an image on display without saving it in memory<br>Supported format:<br>- 0x01: 1bpp<br>- 0x02: 4bpp with Heatshrink compression |
 | 0x46 | imgDelete   | `u8 id`                                | 1                       | Delete image<br>if `id`= 0xFF, delete all images                |
 | 0x47 | imgList     | -                                      | 0                       | Give the list of saved images                                   |
 
@@ -529,7 +529,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 
 | ID   | commands    | Parameters            | Data length (B)        | Description                                   |
 |------|-------------|-----------------------|------------------------|-----------------------------------------------|
-| 0x95 | animSave    | `u8 id`<br>`u32 totalSize`<br>`u32 imgSize`<br>`u16 width` | 11 for the first chunk | Save an animation of `totalSize` bytes<br>`u32 imgSize` if the reference frame size in byte |
+| 0x95 | animSave    | `u8 id`<br>`u32 totalSize`<br>`u32 imgSize`<br>`u16 width`<br>`u8 fmt`<br>`u32 imgCompressedSize` | 16 for the first chunk | Save an animation of `totalSize` bytes<br>`u32 imgSize` is the reference frame size in byte<br>`width` is the reference image width in pixel<br>`fmt` format of reference frame<br>- 0x00: 4bpp<br>- 0x02: 4bpp with Heatshrink compression, decompressed into 4bpp by the firmware before saving<br>`imgCompressedSize` is the reference frame size before it's decompressed. For 4bpp it's equal to `imgSize` |
 | 0x96 | animDelete  | `u8 id`               | 1                      | Delete an animation<br>if `id` = 0xFF, delete all animations |
 | 0x97 | animDisplay | `u8 handlerId`<br>`u8 id`<br>`u16 delay`<br>`u8 repeat`<br>`s16 x`<br>`s16 y` | 9 | Display animation `id` to the corresponding coordinates<br>`delay` set the inter-frame duration in ms<br>`handlerId` value is specified by the user and used to stop the animation<br>`repeat` is for the repeat count or 0xFF for infinite repetition<br>Coordinates are signed, they can be negative |
 | 0x98 | animClear   | `u8 handlerId`        | 1                      | Stop and clear the screen of the corresponding animation<br>if `handlerId` = 0xFF, clear all animations |
@@ -607,12 +607,14 @@ If the string length is shorter than the maximum length. The string must be NUL 
 
 | ID   | commands    | Parameters                               | Data length (B)         | Description                                                     |
 |------|-------------|------------------------------------------|-------------------------|-----------------------------------------------------------------|
-| 0x40 | imgList     | -                                        | 0                       | Give the list of saved images<br>Deprecated since 4.0.0          |
+| 0x40 | imgList     | -                                        | 0                       | Give the list of saved images<br>Deprecated since 4.0.0         |
 | 0x41 | imgSave     | `u32 size`<br>`u16 width`<br>`u8 id`     | 7 for the first chunk   | Save 4bpp image of `size` bytes and `width` pixels<br><br>Parameter `id` was added in 4.0.0<br>it's still possible to send the command without `id` if the new version with `id` was never used<br><br>Parameter `format` was added in 4.5.0.<br> `format` is used to identify in which format the data will be stored<br>Without `format`, the image will be considered as 4bpp |
+| 0x44 | imgStream   | `u32 size`<br>`u16 width`<br>`s16 x`<br>`s16 y` | 10 for the first chunk | Stream an image on display without saving it in memory<br>Default format is 1bpp<br>New format parameter added in 4.6.0 |
 | 0x45 | imgSave1bpp | `u32 size`<br>`u16 width`<br>`u8 id`     | 7 for the first chunk   | Save 1bpp image of `size` bytes and `width` pixel<br><br>Parameter `id` was added in 4.0.0<br>it's still possible to send the command without `id` if the new version with `id` was never used<br><br> Since 4.5.0, it's recommended to use the command `imgSave` with `format` parameter |
 | 0xA1 | WConfigID   | `u8 cfgId`<br>`u32 version`<br>`u8 unused[3]` | 8           | Write config, version is used to track which config is in the device<br>Deprecated since 4.0.0<br>`cfgId` 1 is redirected to system config<br>`cfgId` 2 redirect to a config named '2' |
-| 0xA2 | RConfigID   | `u8 cfgId`                               | 1                       | Read config<br>Deprecated since 4.0.0                            |
+| 0xA2 | RConfigID   | `u8 cfgId`                               | 1                       | Read config<br>Deprecated since 4.0.0                           |
 | 0xA3 | SetConfigID | `u8 cfgId`                               | 1                       | Set current config to display images, layouts, and fonts<br>Deprecated since 4.0.0 |
+| 0x95 | animSave    | `u8 id`<br>`u32 totalSize`<br>`u32 imgSize`<br>`u16 width` | 11 for the first chunk | Save an animation of `totalSize` bytes<br>`u32 imgSize` if the reference frame size in byte<br>Deprecated since 4.6.0|
 
 **ActiveLook to Master**
 
@@ -876,7 +878,11 @@ Heatshrink is available in multiple languages: [python](https://pypi.org/project
 
 ⚠ The `cfgWrite` command is required before images upload.  
 
-The `imgSave` command is used to transfer an image with Heatshrink compression. The image is decompressed before saving, this allows to reduce the time required to display an image at the cost of memory usage.  
+The `imgSave` command is used to transfer an image with Heatshrink compression. 
+
+Depending on the format parameter, the image may be decompressed before saving or displaying:  
+* **0x02**: Decompress before saving. This is used to reduce BLE transfer time without increasing the display time
+* **0x03**: Decompress before displaying. This is used to reduce BLE transfer and memory usage but at cost of display time.
 
 First, image identifier, 4bpp image size in bytes, image width in pixels, and format must be sent.  
 If the image has an odd width, each line must be finished with a dummy pixel (4bit) included in the size.  
@@ -889,10 +895,10 @@ Example with 15 x 10 image:
 
 Data Parsing:
 
-| image identifier | 4bpp image size in bytes        | image width      | format                           |
-|------------------|---------------------------------|------------------|----------------------------------|
-| `0x0A`           | `0x00 0x00 0x00 0x50`           | `0x00 0x0F`      | `0x02`                           |
-| 10               | 80 bytes, 10 lines of 16 pixels | 15 pixels        | 4bpp with heatshrink compression |
+| image identifier | 4bpp image size in bytes        | image width      | format                                                       |
+|------------------|---------------------------------|------------------|--------------------------------------------------------------|
+| `0x0A`           | `0x00 0x00 0x00 0x50`           | `0x00 0x0F`      | `0x02`                                                       |
+| 10               | 80 bytes, 10 lines of 16 pixels | 15 pixels        | 4bpp with heatshrink compression<br>Decompress before saving |
 
 <br>
 
@@ -926,33 +932,37 @@ For the image used in example (![example-15x10.png](/resources/example-15x10.png
 ####  5.5.4. <a name='StreamingImage'></a>Streaming Image
 
 It is also possible to stream images on display without saving them in memory with the command `imgStream`.  
-This method is based on the same principle used to save bitmaps with 1 bit per pixel (a method with 4 bits per pixel would require transferring too much data).  
+This method is based on the same principle used to save image with 1 bit per pixel or 4 bit per pixel with HeatShrink compression.  
 
-First, 1bpp image size in bytes, image width in pixels, x/y coordinate must be sent.  
-If the image width is not a multiple of 8, each line must be finished with dummy pixels included in the size.  
+For 1bpp:
+* First, 1bpp image size in bytes, image width in pixels, x/y coordinate and format must be sent.  
+* If the image width is not a multiple of 8, each line must be finished with dummy pixels included in the size.  
+
+For 4bpp with HeatShrink:
+* First, 4bpp image size in bytes before compressiopn, image width in pixels, x/y coordinate and format must be sent.  
 
 Example with 15 x 10 image: 
 
-| FF       | 44         | 00         | 0F           | -        | 00000014000F00320050        | AA     |
+| FF       | 44         | 00         | 10           | -        | 00000014000F0032005001      | AA     |
 |----------|------------|------------|--------------|----------|-----------------------------|--------|
 | Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
 
 Data Parsing:
 
-| 1bpp image size in bytes        | image width      | x           | y           |
-|---------------------------------|------------------|-------------|-------------|
-| `0x00 0x00 0x00 0x14`           | `0x00 0x0F`      | `0x00 0x32` | `0x00 0x50` |
-| 20 bytes, 10 lines of 16 pixels | 15 pixels        | x = 50      | y = 80      |
+| 1bpp image size in bytes        | image width      | x           | y           | format      |
+|---------------------------------|------------------|-------------|-------------|-------------|
+| `0x00 0x00 0x00 0x14`           | `0x00 0x0F`      | `0x00 0x32` | `0x00 0x50` | `0x01`      |
+| 20 bytes, 10 lines of 16 pixels | 15 pixels        | x = 50      | y = 80      | 1bpp        |
 
 <br>
 
 Data are sent in chunks of 512 bytes with command `imgStream`  
-A line can't be truncated between two chunks. Each chunk must contain only complete lines. 
+A line can't be truncated between two chunks. Each chunk must contain only complete lines.  
 
-For example, a 15x10 bitmap can be done as follows :
+For example, a 15x10 image can be done as follows :
 ``` python
 ## 20 bytes, 15 pixels width, x = 50, y = 80
-0xFF44000F00000014000F00320050AA
+0xFF44001000000014000F0032005001AA
 ## image data, 10 lines of 2 bytes
 0xFF440019C001300608080410022001400140814062211C1EAA
 ```
@@ -1001,6 +1011,8 @@ Here an animation of 4 images
 ⚠ The `cfgWrite` command is required before animations upload.  
 
 The first image is used as a reference and is in the same format as a 4bpp image, a full-frame with all data saved  
+HeatShrink can be used to reduce the data transfered via BLE. It's the same methode shown in this [section](#SavingimagewithHeatshrikcompression)
+
 Data of the following frames is the difference between the previous and the current frame.  
 
 Bellow, data saved for each frame are colored:  
@@ -1028,18 +1040,18 @@ This can result in a bigger animation size if the animation change at the edge o
 
 To save an animation, first, animation identifier, animation size in bytes, and reference frame width in pixels must be sent.  
 
-| FF       | 95         | 00         | 10           | -        | 0A00000539000001F0001F      | AA     |
-|----------|------------|------------|--------------|----------|-----------------------------|--------|
-| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
+| FF       | 95         | 00         | 15           | -        | 0A000003C2000001F0001F0200000079 | AA     |
+|----------|------------|------------|--------------|----------|----------------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                             | End ID |
 
 Data Parsing:
 
-| identifier       | animation size in bytes         | reference size        | reference width  |
-|------------------|---------------------------------|-----------------------|------------------|
-| `0x0A`           | `0x00 0x00 0x05 0x39`           | `0x00 0x00 0x01 0xF0` | `0x00 0x1F`      |
-| 10               | 1337 bytes                      | 496 bytes             | 31 pixels        |
+| identifier       | animation size in bytes         | reference size        | reference width  | format     | reference compressed size |
+|------------------|---------------------------------|-----------------------|------------------|------------|---------------------------|
+| `0x0A`           | `0x00 0x00 0x02 0xC2`           | `0x00 0x00 0x01 0xF0` | `0x00 0x1F`      | `0x02`     | `0x00 0x00 0x00 0x79`     |
+| 10               | 706 bytes                       | 496 bytes             | 31 pixels        | HeatShrink | 112 bytes                 |
 
-Then, the data of the reference frame must be sent. The format is described in chapter [Saving Image, 4 bits per pixel](#SavingImage4bitsperpixel)
+Then, the data of the reference frame must be sent. The format is described in chapter: [Saving Image, 4 bits per pixel](#SavingImage4bitsperpixel), [Saving image with Heatshrink compression](#SavingimagewithHeatshrikcompression)
 
 Following the reference frame, are the compressed frames with this data format:
 
@@ -1058,13 +1070,12 @@ Example for a 31 x 31 animation with 8 frames:
 
 ``` python
 ## write config "Demo"
-0xFFD0001244656D6F00000000000001E240AA
+0xFFD0001244656D6F000000000000000000AA
 ## save animation #10
-0xFF9500100A00000539000001F0001FAA
-## reference frame following by 7 compressed frames
-0xFF95100206000000000000660666060000000000000000000060666606666666000000000000000060666666066666666600000000000000666666660666666666060000000000606666666606666666666600000000000666666600000060666606060000006066606600000000006066606600000066660606000000000000066666060000666666000000000000006066660600606666060000000000000000666666006066660000000000000000006066660060666600000000000000000060666600666606000000000000000000606666066666060000000000000000000066660666660600000000000000000000666606000000000000000000000000000000006666060000000000000000000066660666660600000000000000000000666606666606000000000000000000606666066066660000000000000000006066660060666600000000000000000060666600606666060000000000000000666666000066666600000000000000606666060000666606060000000000000D6666060000606660660000000000D0DD60660000000006666666060000DDDDDD0D0600000000606666666606DDDDDDDDDD0000000000006666666606DDDDDDDD0D0000000000006066666606DDDDDDDD000000000000000060666606DDDDDD00000000000000000000006606DD0D00000000000000080017000F00080D00000000000006AA
-0xFF9510020600110007DD0D0000000000660600130006DDDDDD0D00006666660600150005DDDDDDDDDD60666666660600130006DDDDDDDD0D666666660600110007DDDDDDDD6066666606000D0009DDDDDD606666060007000CDD0D6606000F001000050000DDDD0D00050000DDDD0D00050000DDDD0D00050001DDDD0D00050001DDDD0D00060001DDDDDD00060002DDDDDD00070002DDDD0D0600070003DD0D6606000900040D66666606000A000566666666660009000666666666060008000766666666000600096666660003000C660600150005000100040D00030003DD0D00050002DDDD0D00060002DDDDDD00060001DDDDDD00050001DDDD0D00050001DDDD0D00050000DDDD0D00050000DDDD0D00050000DDDD0D0000001F00050000666606000500006666060005000066660600050001666606000500016666060006000166666600060002666666000500026666060003000366060001000406000F00000003000CDD0D00060009DDDDDD00080007DDDDDDDD00090006DDDDDDDD0D000A0005DDDDDDDDDD0008000406DDDDDD000700036606DD0D000700026666060D00060002666666000600016666660005000166660600050001666606000500006666060005000066660600050000666606000800000007000C6606DD0D000D0009666666D0DDDD0D0011000766666666D0DDDDDD0D001300066666666606DDDDDDDDAA
-0xFF9510013F0D001500056666666666D0DDDDDDDD0D00130006666666000000D0DDDD0D0011000766060000000000DD0D000F0008060000000000000D000F0000000300106606000600106666660008001066666666000900106666666606000A0010666666666600080013666666D0000700156606DD0D0007001606DDDD0D00060017DDDDDD00060018DDDDDD00050019DDDD0D00050019DDDD0D00060019DDDDDD0005001ADDDD0D0005001ADDDD0D001500050001001A060003001966060005001866660600060017666666000600186666660005001966660600050019666606000600196666660005001A6666060005001A6666060000001F0005001ADDDD0D0005001ADDDD0D00060019DDDDDD00050019DDDD0D00050019DDDD0D00060018DDDDDD00060017DDDDDD00050018DDDD0D00030019DD0D0001001A0DAA
+0xFF9500150A000003C2000001F0001F0200000079AA
+## reference frame whith HeatShrink compression following by 7 compressed frames
+0xFF95100206002D9A0C01106CD82CC0F200083A81E810705183D064A1E307A881474C44310181C4022276042059850A0922BC8C4C08A689079A5EC1FE4E35BF32281FE0CC0978BFC1FE5F53FF83FD7FEDFF7FD4341E81510088393A1DD0429C882E7DD000C34508362081038800256807AC34AF00F553D83A86460F11630000080017000F00080D0000000000000600110007DD0D0000000000660600130006DDDDDD0D00006666660600150005DDDDDDDDDD60666666660600130006DDDDDDDD0D666666660600110007DDDDDDDD6066666606000D0009DDDDDD606666060007000CDD0D6606000F001000050000DDDD0D00050000DDDD0D00050000DDDD0D00050001DDDD0D00050001DDDD0D00060001DDDDDD00060002DDDDDD00070002DDDD0D0600070003DD0D6606000900040D66666606000A000566666666660009000666666666060008000766666666000600096666660003000C660600150005000100040D00030003DD0D00050002DDDD0D00060002DDDDDD00060001DDDDDD00050001DDDD0D00050001DDDD0D00050000DDDD0D00050000DDDD0D00050000DDDD0D0000001F00050000666606000500006666060005000066660600050001666606000500016666060006000166666600060002666666000500026666060003000366060001000406000F00000003000CDD0D00060009DDDDDD00080007DDDDDDDD000900AA
+0xFF951001C806DDDDDDDD0D000A0005DDDDDDDDDD0008000406DDDDDD000700036606DD0D000700026666060D00060002666666000600016666660005000166660600050001666606000500006666060005000066660600050000666606000800000007000C6606DD0D000D0009666666D0DDDD0D0011000766666666D0DDDDDD0D001300066666666606DDDDDDDD0D001500056666666666D0DDDDDDDD0D00130006666666000000D0DDDD0D0011000766060000000000DD0D000F0008060000000000000D000F0000000300106606000600106666660008001066666666000900106666666606000A0010666666666600080013666666D0000700156606DD0D0007001606DDDD0D00060017DDDDDD00060018DDDDDD00050019DDDD0D00050019DDDD0D00060019DDDDDD0005001ADDDD0D0005001ADDDD0D001500050001001A060003001966060005001866660600060017666666000600186666660005001966660600050019666606000600196666660005001A6666060005001A6666060000001F0005001ADDDD0D0005001ADDDD0D00060019DDDDDD00050019DDDD0D00050019DDDD0D00060018DDDDDD00060017DDDDDD00050018DDDD0D00030019DD0D0001001A0DAA
 ```
 
 ####  5.6.2. <a name='Animationdisplay'></a>Animation display
@@ -1216,11 +1227,11 @@ For the system configuration, specific layouts will be automatically used on cor
 |     1     | Splash Screen 2    | 2nd splash screen displayed after the 1st one                 |
 |     2     | Connection request | Screen when no BLE connection to the device after boot        |
 |     3     | Connected          | Connection established screen                                 |
-|     4     | Connection lost    | Screen following BLE disconnection                            |
-|     5     | Shut Down          | Message displayed before shut down.                           |
+|     4     | -                  | Reserved                                                      |
+|     5     | Shutdown           | Message displayed before shutdown                             |
 |     6     | -                  | Reserved                                                      |
 |     7     | Battery level      | Screen used to display the battery level                      |
-|     8     | -                  | Reserved                                                      |
+|     8     | Disconnecting      | Screen following BLE disconnection                            |
 |     9     | Firmware update    | Firmware update ongoing screen                                |
 
 **Layout parameters**
@@ -1268,6 +1279,8 @@ The element positions are all referenced from the layout clipping region (X0, Y0
 | text        | 9  | 6...                 | `s16 x`<br>`s16 y`<br>`u8 str_length`<br>`str string[str_length]` |
 | gauge       | 10 | 1                    | `u8 gauge_id`                                                     |
 | anim        | 11 | 9                    | `u8 handlerId`<br>`u8 id`<br>`u16 delay`<br>`u8 repeat`<br>`s16 x`<br>`s16 y` |
+| polyline    | 12 | 4 + (n + 1) * 4      | `u8 nb_points`<br>`u8 thickness`<br>`u8 reserved`<br>`u8 reserved`<br>`s16 x0`<br>`s16 y0`<br>...<br>`s16 xN`<br>`s16 yN` | 
+
 
 ⚠  If the layout use a gauge, the gauge value will come from the text provided in the `layoutDisplay` command
 
@@ -1500,8 +1513,8 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 ##  7. <a name='Credit'></a>Credit
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
-This documentation supports the ActiveLook Firmware version *4.5.0b*  
-Document version "fw-4.5.0_doc-revA"  
+This documentation supports the ActiveLook Firmware version *4.6.0b*  
+Document version "fw-4.6.0_doc-revA"  
 
 ##  8. <a name='Support'></a>Support
 Reach out to the ActiveLook® team at one of the following places:
