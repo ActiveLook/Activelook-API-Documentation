@@ -1,79 +1,75 @@
-# ActiveLook® Programming Interface 
+# ActiveLook® Programming Interface <!-- omit in toc -->
 
 <p align="center"> <img src="./resources/ActiveLook_components.png"/ </p>
 
-# Table of Contents
-<!-- vscode-markdown-toc -->
-* 1. [Introduction](#Introduction)
-* 2. [A Bluetooth Low Energy protocol](#ABluetoothLowEnergyprotocol)
-	* 2.1. [BLE & GATT](#BLEGATT)
-	* 2.2. [Advertising](#Advertising)
-	* 2.3. [Services and characteristics](#Servicesandcharacteristics)
-* 3. [Command Interface Service](#CommandInterfaceService)
-	* 3.1. [Rx server](#Rxserver)
-	* 3.2. [Tx server](#Txserver)
-	* 3.3. [User data server](#Userdataserver)
-	* 3.4. [Sensor server](#Sensorserver)
-	* 3.5. [Control server](#Controlserver)
-* 4. [ActiveLook® Commands](#ActiveLookCommands)
-	* 4.1. [Scalar Value Types](#ScalarValueTypes)
-	* 4.2. [Glossary](#Glossary)
-	* 4.3. [General commands](#Generalcommands)
-	* 4.4. [Display luminance commands](#Displayluminancecommands)
-	* 4.5. [Optical sensor commands](#Opticalsensorcommands)
-	* 4.6. [Graphics commands](#Graphicscommands)
-	* 4.7. [Images commands](#Imagescommands)
-	* 4.8. [Font commands](#Fontcommands)
-	* 4.9. [Layout commands](#Layoutcommands)
-	* 4.10. [Gauge commands](#Gaugecommands)
-	* 4.11. [Page commands](#Pagecommands)
-	* 4.12. [Animation commands](#Animationcommands)
-	* 4.13. [Statistics commands](#Statisticscommands)
-	* 4.14. [Configuration commands](#Configurationcommands)
-	* 4.15. [Device commands](#Devicecommands)
-	* 4.16. [Deprecated commands](#Deprecatedcommands)
-* 5. [ActiveLook® commands guide](#ActiveLookcommandsguide)
-	* 5.1. [Color](#Color)
-	* 5.2. [Luma](#Luma)
-	* 5.3. [Graphical Objects](#GraphicalObjects)
-	* 5.4. [Configurations](#Configurations)
-	* 5.5. [Images](#Images)
-		* 5.5.1. [Saving Image, 4 bits per pixel](#SavingImage4bitsperpixel)
-		* 5.5.2. [Saving Image, 1 bit per pixel](#SavingImage1bitperpixel)
-		* 5.5.3. [Saving image with Heatshrink compression](#SavingimagewithHeatshrinkcompression)
-		* 5.5.4. [Streaming Image](#StreamingImage)
-		* 5.5.5. [Coordinates](#Coordinates)
-	* 5.6. [Animation](#Animation)
-		* 5.6.1. [Saving animation](#Savinganimation)
-		* 5.6.2. [Animation display](#Animationdisplay)
-		* 5.6.3. [Stopping and clearing animation](#Stoppingandclearinganimation)
-	* 5.7. [Text](#Text)
-	* 5.8. [Shift](#Shift)
-	* 5.9. [Font](#Font)
-	* 5.10. [Layout](#Layout)
-		* 5.10.1. [Layout Position](#LayoutPosition)
-		* 5.10.2. [Default configuration](#Defaultconfiguration)
-	* 5.11. [Gauge](#Gauge)
-	* 5.12. [Page](#Page)
-* 6. [UI design, Good practices](#UIdesignGoodpractices)
-	* 6.1. [What is ‘changing’, what is ‘fixed’ in your UI?](#WhatischangingwhatisfixedinyourUI)
-	* 6.2. [Think ‘erasing’](#Thinkerasing)
-	* 6.3. [Aligning text](#Aligningtext)
-	* 6.4. [Useful display area](#Usefuldisplayarea)
-	* 6.5. [Optical Quality guidelines](#OpticalQualityguidelines)
-	* 6.6. [BLE data transfer](#BLEdatatransfer)
-	* 6.7. [Images and Fonts](#ImagesandFonts)
-	* 6.8. [Layouts and Pages](#LayoutsandPages)
-* 7. [Credit](#Credit)
-* 8. [Support](#Support)
+# Table of Contents <!-- omit in toc -->
+<!-- used vs-code extension: Markdown All in One-->
+- [1. Introduction](#1-introduction)
+- [2. A Bluetooth Low Energy protocol](#2-a-bluetooth-low-energy-protocol)
+	- [2.1. BLE GATT](#21-ble-gatt)
+	- [2.2. Advertising](#22-advertising)
+	- [2.3. Services and characteristics](#23-services-and-characteristics)
+- [3. Command Interface Service](#3-command-interface-service)
+	- [3.1. Rx server](#31-rx-server)
+	- [3.2. Tx server](#32-tx-server)
+	- [3.3. User data server](#33-user-data-server)
+	- [3.4. Sensor server](#34-sensor-server)
+	- [3.5. Control server](#35-control-server)
+- [4. ActiveLook® Commands](#4-activelook-commands)
+	- [4.1. Scalar Value Types](#41-scalar-value-types)
+	- [4.2. Glossary](#42-glossary)
+	- [4.3. General commands](#43-general-commands)
+	- [4.4. Display luminance commands](#44-display-luminance-commands)
+	- [4.5. Optical sensor commands](#45-optical-sensor-commands)
+	- [4.6. Graphics commands](#46-graphics-commands)
+	- [4.7. Images commands](#47-images-commands)
+	- [4.8. Font commands](#48-font-commands)
+	- [4.9. Layout commands](#49-layout-commands)
+	- [4.10. Gauge commands](#410-gauge-commands)
+	- [4.11. Page commands](#411-page-commands)
+	- [4.12. Animation commands](#412-animation-commands)
+	- [4.13. Statistics commands](#413-statistics-commands)
+	- [4.14. Configuration commands](#414-configuration-commands)
+	- [4.15. Device commands](#415-device-commands)
+	- [4.16. Deprecated commands](#416-deprecated-commands)
+- [5. ActiveLook® commands guide](#5-activelook-commands-guide)
+	- [5.1. Color](#51-color)
+	- [5.2. Luma](#52-luma)
+	- [5.3. Graphical Objects](#53-graphical-objects)
+	- [5.4. Configurations](#54-configurations)
+	- [5.5. Images](#55-images)
+		- [5.5.1. Saving Image, 4 bits per pixel](#551-saving-image-4-bits-per-pixel)
+		- [5.5.2. Saving Image, 1 bit per pixel](#552-saving-image-1-bit-per-pixel)
+		- [5.5.3. Saving image with Heatshrink compression](#553-saving-image-with-heatshrink-compression)
+		- [5.5.4. Saving image, 8 bits per pixel](#554-saving-image-8-bits-per-pixel)
+		- [5.5.5. Streaming Image](#555-streaming-image)
+		- [5.5.6. Coordinates](#556-coordinates)
+	- [5.6. Animation](#56-animation)
+		- [5.6.1. Saving animation](#561-saving-animation)
+		- [5.6.2. Animation display](#562-animation-display)
+		- [5.6.3. Stopping and clearing animation](#563-stopping-and-clearing-animation)
+	- [5.7. Text](#57-text)
+	- [5.8. Shift](#58-shift)
+	- [5.9. Font](#59-font)
+	- [5.10. Layout](#510-layout)
+		- [5.10.1. Layout Position](#5101-layout-position)
+		- [5.10.2. Default configuration](#5102-default-configuration)
+	- [5.11. Gauge](#511-gauge)
+	- [5.12. Page](#512-page)
+- [6. UI design, Good practices](#6-ui-design-good-practices)
+	- [6.1. What is ‘changing’, what is ‘fixed’ in your UI?](#61-what-is-changing-what-is-fixed-in-your-ui)
+	- [6.2. Think ‘erasing’](#62-think-erasing)
+	- [6.3. Aligning text](#63-aligning-text)
+	- [6.4. Useful display area](#64-useful-display-area)
+	- [6.5. Optical Quality guidelines](#65-optical-quality-guidelines)
+	- [6.6. BLE data transfer](#66-ble-data-transfer)
+	- [6.7. Images and Fonts](#67-images-and-fonts)
+	- [6.8. Layouts and Pages](#68-layouts-and-pages)
+- [7. Credit](#7-credit)
+- [8. Support](#8-support)
 
-<!-- vscode-markdown-toc-config
-	numbering=true
-	autoSave=true
-	/vscode-markdown-toc-config -->
-<!-- /vscode-markdown-toc -->
 
-##  1. <a name='Introduction'></a>Introduction
+## 1. Introduction
 The ActiveLook® solution has been designed to provide a low-power head-up display user interface in glasses. The cornerstone behind the low-power performance lays in the specific display and its management.
 
 <p align="center"> <img src="./resources/ActiveLook_microdisplay_and_pen.png"/ </p>
@@ -90,15 +86,15 @@ ActiveLook® glasses typically includes:
 * An application on an external BLE-enabled device (smartphone, smartwatch, bike computer, …) managing the information and driving the glasses.
 
 
-##  2. <a name='ABluetoothLowEnergyprotocol'></a>A Bluetooth Low Energy protocol
+## 2. A Bluetooth Low Energy protocol
 
-###  2.1. <a name='BLEGATT'></a>BLE & GATT
+### 2.1. BLE GATT
 
 The basic technologies behind the ActiveLook® display management are [Bluetooth Low Energy (BLE)](https://en.wikipedia.org/wiki/Bluetooth_Low_Energy) and [GATT](https://www.bluetooth.com/specifications/gatt).
 
 They allow "discovery" and communication between ActiveLook® glasses (slave device) and a master BLE device. In general, you have to know about services and characteristics to communicate with a BLE device.
 
-###  2.2. <a name='Advertising'></a>Advertising
+### 2.2. Advertising
 The advertising interval is set to 25 ms at startup.
  
 After 30 seconds without a connection request from a master device, the advertising interval is set to 250 ms.
@@ -136,7 +132,7 @@ Exemple: `0x` `1109412E4C6F6F4B20202020303030313238` `0302F5F2` `05FFFADA08F2`.
 ⚠ It is recommended to filter Bluetooth devices during discovery by manufacturer ID ending by `0x08F2`  
 
 
-###  2.3. <a name='Servicesandcharacteristics'></a>Services and characteristics 
+### 2.3. Services and characteristics 
 
 The following services are implemented in the BLE interface (four are standard services and two are custom for dedicated ActiveLook® commands and firmware updates).
 
@@ -202,9 +198,9 @@ UUID `0000FEF5-0000-1000-8000-00805F9B34FB`
 
 (Reserved) 
 
-##  3. <a name='CommandInterfaceService'></a>Command Interface Service
+## 3. Command Interface Service
 
-###  3.1. <a name='Rxserver'></a>Rx server
+### 3.1. Rx server
 
 The custom service Rx server characteristic is used to send commands to an ActiveLook® device.
 
@@ -256,13 +252,13 @@ Examples of `Command Format` usage with command `clear` used to clear the displa
 | `Query ID`: 0 Byte<br>`Length`: 2 Bytes  | 0xFF   | 0x01       | 0x10           | 0x00 0x06 | -                    | -        | 0xAA   |
 | `Query ID`: 4 Bytes<br>`Length`: 2 Bytes | 0xFF   | 0x01       | 0x14           | 0x00 0x0A | 0x04 0x03 0x02 0x01  | -        | 0xAA   |
 
-###  3.2. <a name='Txserver'></a>Tx server
+### 3.2. Tx server
 
 The Tx server allows communicating from the device to the master device through notifications. 
 
 ⚠ The notifications should be enabled by the master device to be able to access this information.
 
-###  3.3. <a name='Userdataserver'></a>User data server 
+### 3.3. User data server
 
 The user data server is used for notifying the master device of user interactions with the ActiveLook® device.
 When the user touches the capacitive button for a short time (<3s) a notification is sent on the user data server to the master application
@@ -271,7 +267,7 @@ Capacitive button notification value: `1`
 
 ⚠ The notifications should be enabled by the master device to be able to access this information.
 
-###  3.4. <a name='Sensorserver'></a>Sensor server
+### 3.4. Sensor server
 
 The sensor server is used for notifying the master device of user gesture detection.
 When a gesture is detected on the glasses (hand motion), a notification is sent on the sensor server to the master application.
@@ -280,7 +276,7 @@ Gesture notification value: `1`
 
 ⚠ The notifications should be enabled by the master device to be able to access this information.
 
-###  3.5. <a name='Controlserver'></a>Control server
+### 3.5. Control server
 
 The Control server provides two types of information:  
 * **Flow control:** used to prevent the Client Device application from overloading the BLE memory buffer of the ActiveLook® device.  The ActiveLook® device will notify the Client device when the Rx Buffer reaches 75%, the Client is required to stop sending data at this time. When the Rx Buffer has been reduced to a safe level, the ActiveLook® device will notify the Client Device to re-start the flow of data.
@@ -322,9 +318,9 @@ A--:3>(1)B: cmd
 -->
 <p align="center"><img src="./resources/ActiveLook_flowCtrl_usage.png"/</p>
 
-##  4. <a name='ActiveLookCommands'></a>ActiveLook® Commands
+## 4. ActiveLook® Commands
 
-###  4.1. <a name='ScalarValueTypes'></a>Scalar Value Types
+### 4.1. Scalar Value Types
 
 ⚠ All data are Most Significant Byte (MSB) First.  
 Example: to encode 1024 on 2 bytes, the first byte is `0x04`, followed by `0x00`.  
@@ -344,7 +340,7 @@ The command parameters can use the following types:
 
 If the string length is shorter than the maximum length. The string must be NUL terminated (c-string) and only useful data can be sent.
 
-###  4.2. <a name='Glossary'></a>Glossary
+### 4.2. Glossary
 
 `r`: radius  
 `f`: font  
@@ -353,21 +349,21 @@ If the string length is shorter than the maximum length. The string must be NUL 
 `B`: byte  
 
 
-###  4.3. <a name='Generalcommands'></a>General commands
+### 4.3. General commands
 
 **Master to ActiveLook**
 
-| ID   | commands  | parameters                | Data length (B)    | Description                                                  |
-|------|-----------|---------------------------|--------------------|--------------------------------------------------------------|
-| 0x00 | power     | `bool en`                 | 1                  | Enable / disable power of the display                        |
-| 0x01 | clear     | -                         | 0                  | Clear the display memory (black screen)                      |
-| 0x02 | grey      | `u8 lvl`                  | 1                  | Set the whole display to the corresponding grey level (0 to 15) |
-| 0x03 | demo      | `u8 demo_id`              | 1                  | Display demonstration:<br>0: Fill screen<br>1: Rectangle with a cross in it<br>2: display saved images, call multiple times to go through all saved images |
-| 0x05 | battery   | -                         | 0                  | Get the battery level in %                                   |
-| 0x06 | vers      | -                         | 0                  | Get the device ID and firmware version                       |
-| 0x08 | led       | `u8 state`                | 1                  | Set green LED:<br>0: Off<br>1: On<br>2: Toggle<br>3: Blinking |
-| 0x09 | shift     | `s16 x`<br>`s16 y`        | 4                  | Shift all subsequently displayed objects of (`x`,`y`) pixels.<br>Valid values are between -128 and 127<br>The values are conserved after reboot |
-| 0x0A | settings  | -                         | 0                  | Return the user parameters (shift, luma, sensor)             |
+| ID   | commands     | parameters         | Data length (B) | Description                                                  |
+|------|--------------|--------------------|---------------- |--------------------------------------------------------------|
+| 0x00 | displayPower | `bool en`          | 1               | Enable / disable power of the display                        |
+| 0x01 | clear        | -                  | 0               | Clear the display memory (black screen)                      |
+| 0x02 | grey         | `u8 lvl`           | 1               | Set the whole display to the corresponding grey level (0 to 15) |
+| 0x03 | demo         | `u8 demo_id`       | 1               | Display demonstration:<br>0: Fill screen<br>1: Rectangle with a cross in it<br>2: display saved images, call multiple times to go through all saved images |
+| 0x05 | battery      | -                  | 0               | Get the battery level in %                                   |
+| 0x06 | vers         | -                  | 0               | Get the device ID and firmware version                       |
+| 0x08 | led          | `u8 state`         | 1               | Set green LED:<br>0: Off<br>1: On<br>2: Toggle<br>3: Blinking |
+| 0x09 | shift        | `s16 x`<br>`s16 y` | 4               | Shift all subsequently displayed objects of (`x`,`y`) pixels.<br>Valid values are between -128 and 127<br>The values are conserved after reboot |
+| 0x0A | settings     | -                  | 0               | Return the user parameters (shift, luma, sensor)             |
 
 **ActiveLook to Master**
 
@@ -378,7 +374,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x0A | settings | `s8 x`<br>`s8 y`<br>`u8 luma`<br>`bool alsEnable`<br>`bool gestureEnable` | 5               | `x`: global x shift<br>`y`: global y shift<br>`luma`: display luminance (0 to 15)<br>`alsEnable`: auto-brightness adjustment status<br>`gestureEnable`: gesture detection status |
 
 
-###  4.4. <a name='Displayluminancecommands'></a>Display luminance commands
+### 4.4. Display luminance commands
 
 **Master to ActiveLook**
 
@@ -387,7 +383,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x10 | luma     | `u8 level`         | 1                  | Set the display luminance to the corresponding level (0 to 15)<br>Luminance is conserved after reboot |
 
 
-###  4.5. <a name='Opticalsensorcommands'></a>Optical sensor commands
+### 4.5. Optical sensor commands
 
 **Master to ActiveLook**
 
@@ -398,7 +394,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x22 | als                 | `bool en`                        | 1               | Turn on/off only the auto-brightness adjustment<br>The sensor state is conserved after reboot                  |
 
 
-###  4.6. <a name='Graphicscommands'></a>Graphics commands
+### 4.6. Graphics commands
 
 **Master to ActiveLook**
 
@@ -413,16 +409,16 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x36 | circf      | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw a full circle at the corresponding coordinates                      |
 | 0x37 | txt        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`u8 f`<br>`u8 c`<br>`str string[255]` | >= 8            | Write text `string` at coordinates (x,y) with rotation, font size, and color |
 | 0x38 | polyline   | `u8 thickness`<br>`u8 reserved`<br>`u8 reserved`<br>`s16 x0`<br>`s16 y0`<br>...<br>`s16 xN`<br>`s16 yN` | 3 + (n + 1) * 4     | Draw multiple connected lines at the corresponding coordinates. Thickness is set for all lines.<br> `Backward compatibility`: The first 3 bytes can be omitted. The length should be equal to (n + 1) * 4. In these case, thickness is equal to 1.|
-| 0x39 | holdFlush  | `u8 action`                                  | 1               | Hold or flush the graphic engine.<br>When held, new display commands are stored in memory and are displayed when the graphic engine is flushed.<br>This allows stacking multiple graphic operations and displaying them simultaneously without screen flickering.<br>The command is nested, the `flush` must be used the same number of times the `hold` was used<br>`action` = 0 : Hold display<br>`action` = 1 : Flush display<br>⚠ `clear` is not held by the graphic engine, a white rectangle can be used instead. |
+| 0x39 | holdFlush  | `u8 action`                                  | 1               | Hold or flush the graphic engine.<br>When held, new display commands are stored in memory and are displayed when the graphic engine is flushed.<br>This allows stacking multiple graphic operations and displaying them simultaneously without screen flickering.<br>The command is nested, the `flush` must be used the same number of times the `hold` was used<br>`action` = 0 : Hold display<br>`action` = 1 : Flush display<br>`action` = 0xFF : Reset and flush all stacked hold. To be used when the state of the device is unknown<br>After a BLE disconnect or an overflow error graphic engine is reset and flushed<br>⚠ `clear` is not held by the graphic engine, a white rectangle can be used instead. |
 
 
-###  4.7. <a name='Imagescommands'></a>Images commands
+### 4.7. Images commands
 
 **Master to ActiveLook**
 
 | ID   | commands    | Parameters                             | Data length (B)         | Description                                                     |
 |------|-------------|----------------------------------------|-------------------------|-----------------------------------------------------------------|
-| 0x41 | imgSave     | `u8 id`<br>`u32 size`<br>`u16 width`<br>`u8 format` | 8 for the first chunk | Save an image of `size` bytes and `width` pixels<br>Save image according to `format`:<br>- 0x00: 4bpp<br>- 0x01: 1bpp, transformed into 4bpp by the firmware before saving<br>- 0x02: 4bpp with Heatshrink compression, decompressed into 4bpp by the firmware before saving<br>- 0x03: 4bpp with Heatshrink compression, stored compressed, decompressed into 4bpp before display |
+| 0x41 | imgSave     | `u8 id`<br>`u32 size`<br>`u16 width`<br>`u8 format` | 8 for the first chunk | Save an image of `size` bytes and `width` pixels<br>Save image according to `format`:<br>- 0x00: 4bpp<br>- 0x01: 1bpp, transformed into 4bpp by the firmware before saving<br>- 0x02: 4bpp with Heatshrink compression, decompressed into 4bpp by the firmware before saving<br>- 0x03: 4bpp with Heatshrink compression, stored compressed, decompressed into 4bpp before display<br>- 0x08: 8bpp with 4 bits for grey level and 4 bits for alpha channel |
 | 0x42 | imgDisplay  | `u8 id`<br>`s16 x`<br>`s16 y`          | 5                       | Display image `id` to the corresponding coordinates<br>Coordinates are signed, they can be negative |
 | 0x44 | imgStream   | `u32 size`<br>`u16 width`<br>`s16 x`<br>`s16 y`<br>`u8 format` | 11 for the first chunk | Stream an image on display without saving it in memory<br>Supported format:<br>- 0x01: 1bpp<br>- 0x02: 4bpp with Heatshrink compression |
 | 0x46 | imgDelete   | `u8 id`                                | 1                       | Delete image<br>if `id`= 0xFF, delete all images                |
@@ -435,7 +431,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x47 | imgList  | `u8 id`<br>`u16 height`<br>`u16 width`<br>...<br>`u8 idN`<br>`u16 heightN`<br>`u16 widthN` | 5 x n           | list of images in memory<br>`height`and `width` are in pixel<br>Listing is not sorted |
 
 
-###  4.8. <a name='Fontcommands'></a>Font commands
+### 4.8. Font commands
 
 **Master to ActiveLook**
 
@@ -453,7 +449,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x50 | fontList | `u8 id`<br>`u8 height`<br>...<br>`u8 idN`<br>`u8 heightN` | 2 x n           | list of font in memory with there height<br>Listing is not sorted |
 
 
-###  4.9. <a name='Layoutcommands'></a>Layout commands
+### 4.9. Layout commands
 
 ⚠ Layout coordinates are unsigned, they are only positive.
 
@@ -467,11 +463,11 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x63 | layoutClear                   | `u8 id`                       | 1                  | Clears screen of the corresponding layout area          |
 | 0x64 | layoutList                    | -                             | 0                  | Give the list of saved layouts                          |
 | 0x65 | layoutPosition                | `u8 id`<br>`u16 x`<br>`u8 y`  | 4                  | Redefine the position of a layout<br>The position is saved |
-| 0x66 | layoutDisplayExtended         | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]` | 5   | Display `text` with layout `id` at position `x` `y`<br>The position is not saved |
+| 0x66 | layoutDisplayExtended         | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]`<br>`u8 extraCmd[n]` | 5 | Display `text` with layout `id` at position `x` `y`<br>The position is not saved<br>`extraCmd` extra commands with the same format as used to save addtional command to a layout |
 | 0x67 | layoutGet                     | `u8 id`                       | 1                  | Get a layout parameters                                 |
 | 0x68 | layoutClearExtended           | `u8 id`<br>`u16 x`<br>`u8 y`  | 4                  | Clears screen of the corresponding layout area          |
 | 0x69 | layoutClearAndDisplay         | `u8 id`<br>`str text[255]`    | 2                  | Clear area and display `text` with layout `id` parameters |
-| 0x6A | layoutClearAndDisplayExtended | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]` | 5                  | Clear area and display `text` with layout `id` at position `x` `y`<br>The position is not saved |
+| 0x6A | layoutClearAndDisplayExtended | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]`<br>`u8 extraCmd[n]` | 5 | Clear area and display `text` with layout `id` at position `x` `y`<br>The position is not saved<br>`extraCmd` extra commands with the same format as used to save addtional command to a layout |
 
 **ActiveLook to Master**
 
@@ -481,7 +477,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x67 | layoutGet  | `layout parameters`            | >= 17           | Layouts parameters without `id`                     |
 
 
-###  4.10. <a name='Gaugecommands'></a>Gauge commands
+### 4.10. Gauge commands
 
 **Master to ActiveLook**
 
@@ -501,7 +497,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x74 | gaugeGet   | `s16 x`<br>`s16 y`<br>`u16 r`<br>`u16 rIn`<br>`u8 start`<br>`u8 end`<br>`bool clockWise` | 11 | Gauge parameters without `id` |
 
 
-###  4.11. <a name='Pagecommands'></a>Page commands                      
+### 4.11. Page commands
 
 **Master to ActiveLook**
 
@@ -523,7 +519,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x85 | pageList  | `u8 id`<br>...<br>`u8 idN`                                 | n               | List of page IDs in memory<br>Listing is not sorted |
 
 
-###  4.12. <a name='Animationcommands'></a>Animation commands
+### 4.12. Animation commands
 
 **Master to ActiveLook**
 
@@ -542,7 +538,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x99 | animList  | `u8 id`<br>...<br>`u8 idN`  | n               | list of animations in memory<br>Listing is not sorted |
 
 
-###  4.13. <a name='Statisticscommands'></a>Statistics commands
+### 4.13. Statistics commands
 
 **Master to ActiveLook**
 
@@ -557,7 +553,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0xA5 | pixelCount         | `u32 count` | 4               | Number of pixels activated on display               |
 
 
-###  4.14. <a name='Configurationcommands'></a>Configuration commands
+### 4.14. Configuration commands
 
 ⚠ Configurations names maximum length is 12 bytes. If the name is shorter than 12 bytes, it must be NUL terminated (c-string)
 
@@ -585,7 +581,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0xD8 | cfgGetNb     | `u8 nbConfig`                      | 1               | number of configurations stored in memory |
 
 
-###  4.15. <a name='Devicecommands'></a>Device commands
+### 4.15. Device commands
 
 **Master to ActiveLook**
 
@@ -602,7 +598,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0xE2 | error        | `u8 cmdId`<br>`u8 error`<br>`u8 subError` | 3               | This message is sent asynchronously when there is an error during command processing<br> `cmdId` is the id of the command who got an error<br> `error` code:<br>1: generic error<br>2: missing the `cfgWrite` command before configuration modification<br>3: memory read/write error<br>4: protocol decoding error<br><br>`subError` is the sub-code of error, or 0 if not specified |
 | 0xE3 | rdDevInfo    | `u8 parameter[n]`                         | n               | Device parameter value<br>Size depends on parameter and its value |
 
-###  4.16. <a name='Deprecatedcommands'></a>Deprecated commands
+### 4.16. Deprecated commands
 
 
 | ID   | commands    | Parameters                               | Data length (B)         | Description                                                     |
@@ -623,15 +619,15 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x40 | imgList   | `u16 height`<br>`u16 width`<br>...<br>`u16 heightN`<br>`u16 widthN` | 4 x n           | list of images in memory<br>`height`and `width` are in pixel<br>Prior to 4.0.0, image listing wasn't giving the image id<br>Deprecated since 4.0.0 |
 | 0xA2 | RConfigID | `u8 cfgId`<br>`u32 version`<br>`u8 nbImg`<br>`u8 nbLayout`<br>`u8 nbFont` | 1    | Read config<br>Deprecated since 4.0.0 |
 
-##  5. <a name='ActiveLookcommandsguide'></a>ActiveLook® commands guide
+## 5. ActiveLook® commands guide
 
-###  5.1. <a name='Color'></a>Color
+### 5.1. Color
 
 The ActiveLook® OLED display is a monochrome display with 15 different grey levels. It is designed as a memory frame buffer that retains the data while not overwritten. As each pixel has only 15 grey levels, the memory is designed with 2 pixels per byte.  
 It is possible to set the grey level with the color commands. The grey level will be used to draw all subsequent graphical objects until the color function is called again.
 
 
-###  5.2. <a name='Luma'></a>Luma
+### 5.2. Luma
 
 Moreover, it is possible to set a global luminance setting (similar to brightness on different screens) between 15 parameters with the `luma` command.  
 
@@ -642,12 +638,12 @@ If the ambient light is bright, and the `luma` command is set to 0.
 The ALS will try to set a high luminance and the `luma` will reduce it.  
 
 
-###  5.3. <a name='GraphicalObjects'></a>Graphical Objects
+### 5.3. Graphical Objects
 
 All shapes included in the graphical commands draw objects with the grey level previously defined with the color commands. 
 
 
-###  5.4. <a name='Configurations'></a>Configurations
+### 5.4. Configurations
 
 All graphical elements saved (layouts, images, etc) are regrouped in a configuration. Each application can use its configuration. Multiple configurations can be stored in the device allowing fast switching between applications.
 
@@ -707,7 +703,7 @@ Before start using layouts, images, etc, the proper configuration must be select
 
 `cfgDelete`, `cfgDeleteLessUsed`, `cfgList`, `cfgFreeSpace` go through a lot of elements in memory. If the memory is full these operations can take a lot of time. If the smartphone communication layer has a timeout, a 20s timeout is recommended.  
 
-###  5.5. <a name='Images'></a>Images
+### 5.5. Images
 
 The graphical functions allow displaying images.  
 The images must first be stored in the device with the `imgSave` command before being displayed.  
@@ -725,7 +721,7 @@ Once saved, it is possible to display the image with the `imgDisplay` command.
 
 At any moment it is possible to retrieve the list of the saved images with the `imgList` command.  
 
-####  5.5.1. <a name='SavingImage4bitsperpixel'></a>Saving Image, 4 bits per pixel
+#### 5.5.1. Saving Image, 4 bits per pixel
 
 The `imgSave` command is used to save an image with 4bpp.
 
@@ -766,7 +762,7 @@ for i in range(height):
 	shift = 0
 	for j in range(width):
 		## convert 8bpp to 4bpp
-		pxl = round(gray[i,j] / 17)
+		pxl = gray[i,j] // 16
 
 		## compress 4bpp
 		byte += pxl << shift
@@ -792,7 +788,7 @@ Example for a 15 x 10 image:
 0xFF410055000000FF0F0000000000FF00F00F000000F0000000F00000000F000000000F00F00000000000F0000F0000000000000F0F0000000000000F0F0000F00000000FF000F00F0F00F00000FF0F00F0FF0F00AA
 ```
 
-####  5.5.2. <a name='SavingImage1bitperpixel'></a>Saving Image, 1 bit per pixel
+#### 5.5.2. Saving Image, 1 bit per pixel
 
 To reduce image transfer time, images can also be sent with 1bpp compression.  
 It's compression with information loss, the grayscale image will be converted to black and white  
@@ -870,7 +866,7 @@ Example for a 15 x 10 image:
 0xFF410019C001300608080410022001400140814062211C1EAA
 ```
 
-####  5.5.3. <a name='SavingimagewithHeatshrinkcompression'></a>Saving image with Heatshrink compression
+#### 5.5.3. Saving image with Heatshrink compression
 
 Images can also be sent with Heatshrink compression to reduce image transfer time.  
 [Heatshrink](https://github.com/atomicobject/heatshrink) is a lossless compression based on [LZSS](https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Storer%E2%80%93Szymanski)  
@@ -929,7 +925,72 @@ Sending data:
 
 For the image used in example (![example-15x10.png](/resources/example-15x10.png)), the compression ratio is 4.  
 
-####  5.5.4. <a name='StreamingImage'></a>Streaming Image
+#### 5.5.4. Saving image, 8 bits per pixel
+
+To be used with transparency, images can be saved in a 8bpp format.  
+For each pixel, the 4 most significant bits represent the color level, and the 4 less significant bits represent the alpha channel : 0xX0 meaning full transparency and 0xXF meaning full opacity. For example, if a pixel is described by : "0b10110010", it has a level of color of "0b1011" and a level of transparency of "0b0010" (almost transparent).  
+
+⚠ The `cfgWrite` command is required before images upload.  
+
+First, image identifier, 8bpp image size in bytes, image width in pixels (or bytes as 1 byte = 1 pixel here), and format must be sent.  
+
+Example with 15 x 10 image:  
+
+| FF       | 41         | 00         | 0D           | -        | 0A00000096000F08            | AA     |
+|----------|------------|------------|--------------|----------|-----------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
+
+Data Parsing:
+
+| image identifier | 8bpp image size in bytes         | image width      | format |
+|------------------|----------------------------------|------------------|--------|
+| `0x0A`           | `0x00 0x00 0x00 0x96`            | `0x00 0x0F`      | `0x08` |
+| 10               | 150 bytes, 10 lines of 15 pixels | 15 pixels        | 8bpp   |
+
+<br>
+
+After, the image data must be sent with 8bpp compression.  
+Example of 8bpp compression for 5 pixels:  
+
+|      pixel number      |   1  |      |   2  |      |   3  |      |   4  |      |   5  |      |
+|:----------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|:----:|
+| **pixel value (8bit)** |   0  |      |  32  |      |  64  |      |  128 |      |  255 |      |
+| **pixel value (4bit)** |   0  |      |   2  |      |   4  |      |   8  |      |  15  |      |
+| **alpha channel (8bit)** |    |  255 |      | 128  |      |  64  |      |  32  |      |   0  |
+| **alpha channel (4bit)** |    |  15  |      |   8  |      |   4  |      |   2  |      |   0  |
+|        **bytes**       | <span style="color:blue">0x0X</span> | <span style="color:blue">0xXF</span> | <span style="color:green">0x2X</span> | <span style="color:green">0xX8</span> | <span style="color:red">0x4X |  <span style="color:red">0xX4</span> | <span style="color:blue">0x8X</span> | <span style="color:blue">0xX2</span> | <span style="color:green">0xFX</span> | <span style="color:green">0xX0</span> |
+|        **frame**       | 0x0F |      | 0x28 |      | 0x44 |      | 0x82 |      | 0xF0 |      |
+
+Example of compression loop in python:
+``` python
+## compress img into 8bpp
+frame = []
+for i in range(height):
+	for j in range(width):
+		## convert 8 bits grayscale to 4 bits and shift left
+		byte = (gray[i,j] // 16) << 4
+
+		## convert 8 bits alpha to bits
+		byte += alpha[i,j] // 16
+
+		frame.append(byte)
+```
+
+<br>
+
+Data are sent in chunks of 512 bytes with the command `imgSave`  
+Example for a 15 x 10 image:  
+``` python
+## write config "Demo"
+0xFFD0001244656D6F00000000000001E240AA
+## save image #10, 80 bytes, 15 pixel width
+0xFF41000D0A00000096000F08AA
+## image data, 10 lines of 15 bytes
+0xFF41009B000000FF0F0000000000FF00F00F000000F0000000F00000000F000000000F00F00000000000F0000F0000000000000F0F0000000000000F0F0000F00000000FF000F00F0F00F00000FF0F00F0FF0F00000000FF0F0000000000FF00F00F000000F0000000F00000000F000000000F00F00000000000F0000F0000000000000F0F0000000000000F0F0000F00000000FF000F00F0F00AA
+```
+
+
+#### 5.5.5. Streaming Image
 
 It is also possible to stream images on display without saving them in memory with the command `imgStream`.  
 This method is based on the same principle used to save image with 1 bit per pixel or 4 bit per pixel with HeatShrink compression.  
@@ -967,7 +1028,7 @@ For example, a 15x10 image can be done as follows :
 0xFF440019C001300608080410022001400140814062211C1EAA
 ```
 
-####  5.5.5. <a name='Coordinates'></a>Coordinates
+#### 5.5.6. Coordinates
 
 The coordinates passed as parameters (x0,y0) and (x1,y1) define the extremities of the element to be drawn. These coordinates are defined as signed integers on 16 bits (2 bytes), and thus can be negative. In that case, the drawn object will be automatically clipped to the screen size (304; 256). 
 The same principle applies to the images.
@@ -978,7 +1039,7 @@ Here is an example of image clipping with x0, y0 as negative values.
 
 Example: `0xFF42000A0AFFC0FFC0AA` display image #10 at (-64;-64).
 
-###  5.6. <a name='Animation'></a>Animation
+### 5.6. Animation
 
 Animations are sequences of images displayed successively with a delay between frames.  
 Here an animation of 4 images  
@@ -1006,7 +1067,7 @@ Here an animation of 4 images
   </tr>
 </table>
 
-####  5.6.1. <a name='Savinganimation'></a>Saving animation
+#### 5.6.1. Saving animation
 
 ⚠ The `cfgWrite` command is required before animations upload.  
 
@@ -1078,7 +1139,7 @@ Example for a 31 x 31 animation with 8 frames:
 0xFF951001C806DDDDDDDD0D000A0005DDDDDDDDDD0008000406DDDDDD000700036606DD0D000700026666060D00060002666666000600016666660005000166660600050001666606000500006666060005000066660600050000666606000800000007000C6606DD0D000D0009666666D0DDDD0D0011000766666666D0DDDDDD0D001300066666666606DDDDDDDD0D001500056666666666D0DDDDDDDD0D00130006666666000000D0DDDD0D0011000766060000000000DD0D000F0008060000000000000D000F0000000300106606000600106666660008001066666666000900106666666606000A0010666666666600080013666666D0000700156606DD0D0007001606DDDD0D00060017DDDDDD00060018DDDDDD00050019DDDD0D00050019DDDD0D00060019DDDDDD0005001ADDDD0D0005001ADDDD0D001500050001001A060003001966060005001866660600060017666666000600186666660005001966660600050019666606000600196666660005001A6666060005001A6666060000001F0005001ADDDD0D0005001ADDDD0D00060019DDDDDD00050019DDDD0D00050019DDDD0D00060018DDDDDD00060017DDDDDD00050018DDDD0D00030019DD0D0001001A0DAA
 ```
 
-####  5.6.2. <a name='Animationdisplay'></a>Animation display
+#### 5.6.2. Animation display
 
 The command `animDisplay` is used to display an animation.  
 The number of animations shown at the same time is limited to 5.
@@ -1087,7 +1148,7 @@ The `handlerId` is a unique value provided by the host, it's used to clear an an
 `repeat` is the number of repetition of the whole frames sequence, a value of `0xFF` means an infinit number of repetition.
 `delay` is the time between frames in milliseconds. The minimum value depends on the animation size and the quantity of variation between frames.
 
-####  5.6.3. <a name='Stoppingandclearinganimation'></a>Stopping and clearing animation
+#### 5.6.3. Stopping and clearing animation
 
 There are several methods to stop and clear an animation:
 * reusing the same `handlerId` to start a new animation
@@ -1096,7 +1157,7 @@ There are several methods to stop and clear an animation:
 * `animClear` can stop and clear a specific animation or all pending animations
 * deleting an animation will only stop it, but it will not clear the screen
 
-###  5.7. <a name='Text'></a>Text
+### 5.7. Text
 
 The graphical commands allow drawing text with different font sizes and orientations. 
 The text command uses the same coordinate principle as the other graphical element commands. 
@@ -1118,14 +1179,14 @@ display text `hello 0` at (152;128) (center of the screen) with direction 0, the
 <p align="center"><img src="./resources/ActiveLook_hello_example.png"/</p>
 
 
-###  5.8. <a name='Shift'></a>Shift
+### 5.8. Shift
 
 To adapt mechanical or optical constraints after system mounting, it is possible to move the displayed objects on the screen using the shift command.
 After setting the shift, all subsequent graphical elements will be displayed with this shift (layouts included). The shift parameters are saved in the device and are applied automatically even after power off and restart.
 The shift command does NOT change the graphical elements already present on display. To apply the shifted display, it is recommended to clear the screen, and then draw new elements on display.
 
 
-###  5.9. <a name='Font'></a>Font 
+### 5.9. Font
 
 ⚠ The `cfgWrite` command is required before fonts upload.  
 
@@ -1209,7 +1270,7 @@ The `fontDelete` command allows erasing a user updated font.
 
 The fonts 1, 2, and 3 are defined in the ActiveLook® device by default. The user can update them. If the user erases one of these fonts, the default one is restored.  
 
-###  5.10. <a name='Layout'></a>Layout
+### 5.10. Layout
 
 To simplify the use of graphical elements, it is possible to save a list of graphical commands in layouts. These layouts are identified by an Id and allow displaying a value (passed as function's argument) as text or displaying another graphical element (image, circle…).
 
@@ -1307,7 +1368,7 @@ forecolor 15, back color 0, font 1
 display the argument value as text at (238;30) with direction 4 and opacity on  
 0xFF6000160A00000000012FFF0F0001<span style="color:red">**0100EE1E0401**</span>AA  
 
-####  5.10.1. <a name='LayoutPosition'></a>Layout Position
+#### 5.10.1. Layout Position
 A layout is defined by its clipping region position, as well as all by the elements that are part of it. 
 It is possible to redefine the position of a layout. All the graphical elements included in the layout will be shifted accordingly (in the limit of the screen boundary).
 
@@ -1339,7 +1400,7 @@ It is possible to erase the layout with the `layoutDelete` command followed by t
 It is possible to clear the screen of the corresponding layout area with the “clearlayout” command.
 Example : `0xFF 0x63 0x00 0x06 0x0D 0xAA`
 
-####  5.10.2. <a name='Defaultconfiguration'></a>Default configuration
+#### 5.10.2. Default configuration
 
 A set of predefined layouts is present in the ActiveLook® device by default in the system configuration, these layouts use a set of default images and fonts and are used by the ActiveLook® smart application to display information.  
 
@@ -1350,7 +1411,7 @@ More information on the visual assets here: [ActiveLook® visual assets](https:/
 <p align="center"><img src="./resources/ActiveLook_example_3_screens.png"/</p>
 
 
-###  5.11. <a name='Gauge'></a>Gauge
+### 5.11. Gauge
 
 A gauge allows to graphically represent a percentage value using circle portions, 16 portions in a full circle, and color gradient. 
 
@@ -1432,7 +1493,7 @@ Frame parsing:
 <p align="center"><img src="./resources/ActiveLook_gauge_4.png"/</p>
 
 
-###  5.12. <a name='Page'></a>Page
+### 5.12. Page
 
 Pages are defined as a set of layouts to be displayed together on the screen. Usually, a layout is used to display a certain type of information, for instance, the speed or the time. Depending on the application and on user settings different layouts can be displayed with a page. Layouts positions are overwritten by page settings to use a unique layout in different pages with different positions.  
 
@@ -1445,20 +1506,20 @@ Pages allow synchronizing multiple layout displays and reduce data bandwidth usa
 <p align="center"><img src="./resources/ActiveLook_page.png"/</p>
 
 
-##  6. <a name='UIdesignGoodpractices'></a>UI design, Good practices
+## 6. UI design, Good practices
 
 To best leverage on the ActiveLook® device, here few guidelines to:
 - increase battery time  
 - improve the visual experience  
 - simplify your development  
 
-###  6.1. <a name='WhatischangingwhatisfixedinyourUI'></a>What is ‘changing’, what is ‘fixed’ in your UI? 
+### 6.1. What is ‘changing’, what is ‘fixed’ in your UI?
 
 Define and split your user interface according to ‘fixed’ and changing’ areas.
 - Only refresh the data (icons or text) solely where and when required => avoid using full-page systematic update or ‘video’ mode.
 - If a subset of your display can be defined by "1 fixed image" + "1 changing text string", then using the ‘Layout’ feature will simplify its management (see below)
 
-###  6.2. <a name='Thinkerasing'></a>Think ‘erasing’ 
+### 6.2. Think ‘erasing’
 
 - ActiveLook® is a memory display: previous content will remain displayed unless you explicitly overlay new opaque content.
 - Use icons of the same size so that overlaying a new icon will fully erase the previous one (or draw black rectangles before redrawing).
@@ -1471,12 +1532,12 @@ To clear content, you can:
 - Use ‘Layouts’ (see below) and proceed with each layout display with the `layoutClear` command of the defined area
 - Erase the whole display with the `clear` command 
 
-###  6.3. <a name='Aligningtext'></a>Aligning text 
+### 6.3. Aligning text
 
 Aligning text may be cumbersome. One may use a padding character to shift your text by a fixed number of pixels. The 0xFF value is used as an empty space.
 
 
-###  6.4. <a name='Usefuldisplayarea'></a>Useful display area
+### 6.4. Useful display area
 
 To accommodate the different personal face features to the optical eye box, it is better not to use the whole display area and keep "margins" on all sides.  
 For instance, in the ActiveLook application, we use a "protection" area of 30 pixels on both horizontal sides and 25 pixels on both vertical sides. This makes an effective useful area of 244 x 206 pixels (See "Adjust screen offset" in the "settings" section and image below)  
@@ -1484,7 +1545,7 @@ The `shift` command (see above) is useful to manage the visual margins.
 
 <p align="center"> <img src="./resources/ActiveLook_Screen_Offset.png"/ </p>
 
-###  6.5. <a name='OpticalQualityguidelines'></a>Optical Quality guidelines
+### 6.5. Optical Quality guidelines
 
 ActiveLook® features a micro-projector. Its compact form factor and integration imply optical trade-offs. To limit visible flare or parasitic reflections it is recommended to:
 
@@ -1494,29 +1555,29 @@ ActiveLook® features a micro-projector. Its compact form factor and integration
 
 With this method implemented, each user can tune the image position to adjust to his preference by using the shift command
 
-###  6.6. <a name='BLEdatatransfer'></a>BLE data transfer
+### 6.6. BLE data transfer
 
 To ensure the transfer of each command, it is recommended to use the Control BLE characteristic, as described in the section [Control server](#Controlserver).
 
-###  6.7. <a name='ImagesandFonts'></a>Images and Fonts
+### 6.7. Images and Fonts
 
 The images have 16 gray levels (pixels are coded on 4 bits). Because of the “mirroring” of the optical system, the content is displayed upside down. You, therefore, have to upload “flipped” images.
 
 To display your image, you need to use the `imgDisplay` command along with the image id. 
 
-###  6.8. <a name='LayoutsandPages'></a>Layouts and Pages
+### 6.8. Layouts and Pages
 
 To simplify the use of graphical elements, it is possible to save a list of graphical commands as “layouts”. These layouts are identified by a simple number and allow displaying a value (passed as function's argument) as text or another graphical element (image, circle…).
 
 Pages are defined as a set of layouts to be displayed together on the screen. Usually, a layout is used to display a certain type of information, for instance, the speed or the time. Depending on the application and on user settings different layouts can be displayed with a page.
 
-##  7. <a name='Credit'></a>Credit
+## 7. Credit
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
-This documentation supports the ActiveLook Firmware version *4.6.0b*  
-Document version "fw-4.6.0_doc-revA"  
+This documentation supports the ActiveLook Firmware version *4.10.0b*  
+Document version "fw-4.10.0_doc-revA"  
 
-##  8. <a name='Support'></a>Support
+## 8. Support
 Reach out to the ActiveLook® team at one of the following places:
 
 * Mail at contact@activelook.net
