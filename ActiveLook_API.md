@@ -1574,8 +1574,8 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 ## 7. Credit
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
-This documentation supports the ActiveLook Firmware version *4.10.0b*  
-Document version "fw-4.10.0_doc-revA"  
+This documentation supports the ActiveLook Firmware version *4.11.2b*  
+Document version "fw-4.11.2_doc-revA"  
 
 ## 8. Support
 Reach out to the ActiveLook® team at one of the following places:
