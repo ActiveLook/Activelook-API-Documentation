@@ -90,113 +90,106 @@ ActiveLook® glasses typically includes:
 
 ### 2.1. BLE GATT
 
-The basic technologies behind the ActiveLook® display management are [Bluetooth Low Energy (BLE)](https://en.wikipedia.org/wiki/Bluetooth_Low_Energy) and [GATT](https://www.bluetooth.com/specifications/gatt).
+The basic technologies behind the ActiveLook® display management are [Bluetooth Low Energy (BLE)](https://en.wikipedia.org/wiki/Bluetooth_Low_Energy) and [GATT](https://www.bluetooth.com/specifications/gatt).  
 
-They allow "discovery" and communication between ActiveLook® glasses (slave device) and a master BLE device. In general, you have to know about services and characteristics to communicate with a BLE device.
+They allow "discovery" and communication between ActiveLook® glasses (slave device) and a master BLE device. In general, you have to know about services and characteristics to communicate with a BLE device.  
 
 ### 2.2. Advertising
-The advertising interval is set to 25 ms at startup.
+The advertising interval is set to 25 ms at startup.  
  
-After 30 seconds without a connection request from a master device, the advertising interval is set to 250 ms.
+After 30 seconds without a connection request from a master device, the advertising interval is set to 250 ms.  
 
-After 3 minutes without a connection request, the advertising is stopped and the device is turned off.
+After 3 minutes without a connection request, the advertising is stopped and the device is turned off.  
 
 
-An ActiveLook® device advertises with the following data:
+An ActiveLook® device advertises with the following data:  
 
 **Advertising Data**
 
-The ActiveLook® device will advertise the following data : 
+The ActiveLook® device will advertise the following data :  
 
-Device complete name, (16 characters): 
-
+Device complete name, (16 characters):  
 - BLE advertising data identifier = `0x09`
-- First characters for Model Name (10 char max, padding with space (`0x20`) if the name is shorter, then 6 characters for Customer Serial Number. Default value='A.Look    xxxxxx', where xxxxxx is the serial number of the glasses. This name can be customized with the `setName` command. 
+- First characters for Model Name (10 char max, padding with space (`0x20`) if the name is shorter, then 6 characters for Customer Serial Number. Default value='A.Look  xxxxxx', where xxxxxx is the serial number of the glasses. This name can be customized with the `setName` command.
 
-UIID list, SUOTA (Software Upgrade Over The Air) service UUID. 
-
+SUOTA (Software Upgrade Over The Air) service UUID:  
 - BLE advertising data identifier = `0x02`
 - value = `0xFEF5`
 
-
-Manufacturer data (customer manufacturer ID and MICROOLED manufacturer ID)
-
+Manufacturer data (customer manufacturer ID and MICROOLED manufacturer ID):  
 - BLE advertising data identifier = `0xFF`
 - Default value = `0xDAFA08F2`, where `0x08F2` is a reserved ActiveLook® value and `0xDAFA` is customer manufacturer ID
 
+Each data is preceded by two bytes, one for length (including identifier), one for data identifier.  
 
-Each data is preceded by two bytes, one for length (including identifier), one for data identifier. 
-
-Exemple: `0x` `1109412E4C6F6F4B20202020303030313238` `0302F5F2` `05FFFADA08F2`.
+Example: `0x` `1109412E4C6F6F4B20202020303030313238` `0302F5F2` `05FFFADA08F2`.  
 
 ⚠ It is recommended to filter Bluetooth devices during discovery by manufacturer ID ending by `0x08F2`  
 
+### 2.3. Services and characteristics
 
-### 2.3. Services and characteristics 
-
-The following services are implemented in the BLE interface (four are standard services and two are custom for dedicated ActiveLook® commands and firmware updates).
+The following services are implemented in the BLE interface (four are standard services and two are custom for dedicated ActiveLook® commands and firmware updates).  
 
 **Generic Attribute**
 
-UUID `0x1801`
+UUID `0x1801`  
 
-Without characteristics
+Without characteristics  
 
 **Generic Access**
 
-UUID `0x1800`
+UUID `0x1800`  
 
 | Characteristic                             | UUID                                   | Property | Value                 |
 | ------------------------------------------ | -------------------------------------- | -------- | --------------------- |
 | Device Name                                | `00002A00-0000-1000-8000-00805F9B34FB` | Read     | `A.LooK`              |
 | Appearance                                 | `00002A01-0000-1000-8000-00805F9B34FB` | Read     | `Generic Eye-glasses` |
-| Peripheral Preferred Connection Parameters | `00002A04-0000-1000-8000-00805F9B34FB` | Read     | `0x0800100000006400`  |
+| Peripheral Preferred Connection Parameters | `00002A04-0000-1000-8000-00805F9B34FB` | Read     | Connection Interval: `15ms - 30ms`<br>Slave Latency: `0`<br>Supervision Timeout: `4s` |
 
 
 **Device Information Service**
 
-UUID `0x180A`
+UUID `0x180A`  
 
 | Characteristic           | UUID                                   | Property | Value       |
 | ------------------------ | -------------------------------------- | -------- | ----------- |
-| Manufacturer Name String | `00002A29-0000-1000-8000-00805F9B34DB` | Read     | `Microoled` |
-| Model Number String      | `00002A24-0000-1000-8000-00805F9B34DB` | Read     | `A.LooK`    |
-| Serial Number String     | `00002A25-0000-1000-8000-00805F9B34DB` | Read     | `xxxxxxxxxx`|
-| Hardware version String  | `00002A27-0000-1000-8000-00805F9B34DB` | Read     | `rev B1`    |
-| Firmware version String  | `00002A26-0000-1000-8000-00805F9B34DB` | Read     | `3.0.0`     |
-| Software version String  | `00002A28-0000-1000-8000-00805F9B34DB` | Read     | `1.0.0.1`   |
+| Manufacturer Name String | `00002A29-0000-1000-8000-00805F9B34FB` | Read     | `Microoled` |
+| Model Number String      | `00002A24-0000-1000-8000-00805F9B34FB` | Read     | `A.LooK`    |
+| Serial Number String     | `00002A25-0000-1000-8000-00805F9B34FB` | Read     | `xxxxxxxxxx`|
+| Hardware version String  | `00002A27-0000-1000-8000-00805F9B34FB` | Read     | `ALK02C`    |
+| Firmware version String  | `00002A26-0000-1000-8000-00805F9B34FB` | Read     | `v4.11.2b`  |
+| Software version String  | `00002A28-0000-1000-8000-00805F9B34FB` | Read     | `1.0.0.1`   |
 
 **Battery Service**
 
-UUID `0x180F`
+UUID `0x180F`  
 
 | Characteristic | UUID                                   | Property    | Value                |
 | -------------- | -------------------------------------- | ----------- | -------------------- |
 | Battery Level  | `00002A19-0000-1000-8000-00805F9B34FB` | Read Notify | battery level (in %) |
 
-Descriptor : UUID `0x2902` characteristic configuration
+Descriptor : UUID `0x2902` characteristic configuration  
 
-⚠ If notifications are enabled by the BLE client, the device will notify the battery level once every 30s.
+⚠ If notifications are enabled by the BLE client, the device will notify the battery level once every 30s.  
 
 **Custom Service (ActiveLook® Commands Interface)**
 
-UUID `0x0783b03e-8535-b5a0-7140-a304d2495cb7`
-
+UUID `0783B03E-8535-B5A0-7140-A304D2495CB7`  
 
 | Characteristic          | UUID                                   | Property                 | Descriptors                                                                 |
 |-------------------------|----------------------------------------|--------------------------|-----------------------------------------------------------------------------|
-| TX ActiveLook           | `0783b03e-8535-b5a0-7140-a304d2495cb8` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Server Tx Data`  |
-| RX ActiveLook           | `0783b03e-8535-b5a0-7140-a304d2495cbA` | Write, Write no response | UUID `0x2902` configuration<br>UUID `0x2901` description: `Server Rx Data`  |
-| Control                 | `0783b03e-8535-b5a0-7140-a304d2495cb9` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Control`         |
-| Gesture Event           | `0783b03e-8535-b5a0-7140-a304d2495cbb` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Gesture Event`   |
-| Touch Event             | `0783b03e-8535-b5a0-7140-a304d2495cbc` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Touch Event`     |
+| TX ActiveLook           | `0783B03E-8535-B5A0-7140-A304D2495CB8` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Server Tx Data`  |
+| RX ActiveLook           | `0783B03E-8535-B5A0-7140-A304D2495CBA` | Write, Write no response | UUID `0x2902` configuration<br>UUID `0x2901` description: `Server Rx Data`  |
+| Control                 | `0783B03E-8535-B5A0-7140-A304D2495CB9` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Control`         |
+| Gesture Event           | `0783B03E-8535-B5A0-7140-A304D2495CBB` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Gesture Event`   |
+| Touch Event             | `0783B03E-8535-B5A0-7140-A304D2495CBC` | Notify                   | UUID `0x2902` configuration<br>UUID `0x2901` description: `Touch Event`     |
 
 
 **Custom Service (firmware update service)**
 
-UUID `0000FEF5-0000-1000-8000-00805F9B34FB`
+UUID `0000FEF5-0000-1000-8000-00805F9B34FB`  
 
-(Reserved) 
+(Reserved)  
 
 ## 3. Command Interface Service
 
@@ -463,11 +456,11 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x63 | layoutClear                   | `u8 id`                       | 1                  | Clears screen of the corresponding layout area          |
 | 0x64 | layoutList                    | -                             | 0                  | Give the list of saved layouts                          |
 | 0x65 | layoutPosition                | `u8 id`<br>`u16 x`<br>`u8 y`  | 4                  | Redefine the position of a layout<br>The position is saved |
-| 0x66 | layoutDisplayExtended         | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]`<br>`u8 extraCmd[n]` | 5 | Display `text` with layout `id` at position `x` `y`<br>The position is not saved<br>`extraCmd` extra commands with the same format as used to save addtional command to a layout |
+| 0x66 | layoutDisplayExtended         | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]`<br>`u8 extraCmd[n]` | 5 | Display `text` with layout `id` at position `x` `y`<br>The position is not saved<br>`extraCmd` extra commands with the same format as used to save additional command to a layout |
 | 0x67 | layoutGet                     | `u8 id`                       | 1                  | Get a layout parameters                                 |
 | 0x68 | layoutClearExtended           | `u8 id`<br>`u16 x`<br>`u8 y`  | 4                  | Clears screen of the corresponding layout area          |
 | 0x69 | layoutClearAndDisplay         | `u8 id`<br>`str text[255]`    | 2                  | Clear area and display `text` with layout `id` parameters |
-| 0x6A | layoutClearAndDisplayExtended | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]`<br>`u8 extraCmd[n]` | 5 | Clear area and display `text` with layout `id` at position `x` `y`<br>The position is not saved<br>`extraCmd` extra commands with the same format as used to save addtional command to a layout |
+| 0x6A | layoutClearAndDisplayExtended | `u8 id`<br>`u16 x`<br>`u8 y`<br>`str text[255]`<br>`u8 extraCmd[n]` | 5 | Clear area and display `text` with layout `id` at position `x` `y`<br>The position is not saved<br>`extraCmd` extra commands with the same format as used to save additional command to a layout |
 
 **ActiveLook to Master**
 
@@ -1000,7 +993,7 @@ For 1bpp:
 * If the image width is not a multiple of 8, each line must be finished with dummy pixels included in the size.  
 
 For 4bpp with HeatShrink:
-* First, 4bpp image size in bytes before compressiopn, image width in pixels, x/y coordinate and format must be sent.  
+* First, 4bpp image size in bytes before compression, image width in pixels, x/y coordinate and format must be sent.  
 
 Example with 15 x 10 image: 
 
@@ -1072,7 +1065,7 @@ Here an animation of 4 images
 ⚠ The `cfgWrite` command is required before animations upload.  
 
 The first image is used as a reference and is in the same format as a 4bpp image, a full-frame with all data saved  
-HeatShrink can be used to reduce the data transfered via BLE. It's the same methode shown in this [section](#SavingimagewithHeatshrikcompression)
+HeatShrink can be used to reduce the data transferred via BLE. It's the same method shown in this [section](#SavingimagewithHeatshrikcompression)
 
 Data of the following frames is the difference between the previous and the current frame.  
 
@@ -1134,7 +1127,7 @@ Example for a 31 x 31 animation with 8 frames:
 0xFFD0001244656D6F000000000000000000AA
 ## save animation #10
 0xFF9500150A000003C2000001F0001F0200000079AA
-## reference frame whith HeatShrink compression following by 7 compressed frames
+## reference frame with HeatShrink compression following by 7 compressed frames
 0xFF95100206002D9A0C01106CD82CC0F200083A81E810705183D064A1E307A881474C44310181C4022276042059850A0922BC8C4C08A689079A5EC1FE4E35BF32281FE0CC0978BFC1FE5F53FF83FD7FEDFF7FD4341E81510088393A1DD0429C882E7DD000C34508362081038800256807AC34AF00F553D83A86460F11630000080017000F00080D0000000000000600110007DD0D0000000000660600130006DDDDDD0D00006666660600150005DDDDDDDDDD60666666660600130006DDDDDDDD0D666666660600110007DDDDDDDD6066666606000D0009DDDDDD606666060007000CDD0D6606000F001000050000DDDD0D00050000DDDD0D00050000DDDD0D00050001DDDD0D00050001DDDD0D00060001DDDDDD00060002DDDDDD00070002DDDD0D0600070003DD0D6606000900040D66666606000A000566666666660009000666666666060008000766666666000600096666660003000C660600150005000100040D00030003DD0D00050002DDDD0D00060002DDDDDD00060001DDDDDD00050001DDDD0D00050001DDDD0D00050000DDDD0D00050000DDDD0D00050000DDDD0D0000001F00050000666606000500006666060005000066660600050001666606000500016666060006000166666600060002666666000500026666060003000366060001000406000F00000003000CDD0D00060009DDDDDD00080007DDDDDDDD000900AA
 0xFF951001C806DDDDDDDD0D000A0005DDDDDDDDDD0008000406DDDDDD000700036606DD0D000700026666060D00060002666666000600016666660005000166660600050001666606000500006666060005000066660600050000666606000800000007000C6606DD0D000D0009666666D0DDDD0D0011000766666666D0DDDDDD0D001300066666666606DDDDDDDD0D001500056666666666D0DDDDDDDD0D00130006666666000000D0DDDD0D0011000766060000000000DD0D000F0008060000000000000D000F0000000300106606000600106666660008001066666666000900106666666606000A0010666666666600080013666666D0000700156606DD0D0007001606DDDD0D00060017DDDDDD00060018DDDDDD00050019DDDD0D00050019DDDD0D00060019DDDDDD0005001ADDDD0D0005001ADDDD0D001500050001001A060003001966060005001866660600060017666666000600186666660005001966660600050019666606000600196666660005001A6666060005001A6666060000001F0005001ADDDD0D0005001ADDDD0D00060019DDDDDD00050019DDDD0D00050019DDDD0D00060018DDDDDD00060017DDDDDD00050018DDDD0D00030019DD0D0001001A0DAA
 ```
@@ -1145,7 +1138,7 @@ The command `animDisplay` is used to display an animation.
 The number of animations shown at the same time is limited to 5.
 
 The `handlerId` is a unique value provided by the host, it's used to clear an animation.  
-`repeat` is the number of repetition of the whole frames sequence, a value of `0xFF` means an infinit number of repetition.
+`repeat` is the number of repetition of the whole frames sequence, a value of `0xFF` means an infinite number of repetition.
 `delay` is the time between frames in milliseconds. The minimum value depends on the animation size and the quantity of variation between frames.
 
 #### 5.6.3. Stopping and clearing animation
@@ -1575,7 +1568,7 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
 This documentation supports the ActiveLook Firmware version *4.11.2b*  
-Document version "fw-4.11.2_doc-revA"  
+Document version "fw-4.11.2_doc-revB"  
 
 ## 8. Support
 Reach out to the ActiveLook® team at one of the following places:
