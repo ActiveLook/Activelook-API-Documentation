@@ -597,9 +597,9 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | ID   | commands    | Parameters                               | Data length (B)         | Description                                                     |
 |------|-------------|------------------------------------------|-------------------------|-----------------------------------------------------------------|
 | 0x40 | imgList     | -                                        | 0                       | Give the list of saved images<br>Deprecated since 4.0.0         |
-| 0x41 | imgSave     | `u32 size`<br>`u16 width`<br>`u8 id`     | 7 for the first chunk   | Save 4bpp image of `size` bytes and `width` pixels<br><br>Parameter `id` was added in 4.0.0<br>it's still possible to send the command without `id` if the new version with `id` was never used<br><br>Parameter `format` was added in 4.5.0.<br> `format` is used to identify in which format the data will be stored<br>Without `format`, the image will be considered as 4bpp |
+| 0x41 | imgSave     | `u8 id`<br>`u32 size`<br>`u16 width`     | 7 for the first chunk   | Save 4bpp image of `size` bytes and `width` pixels<br><br>Parameter `id` was added in 4.0.0<br>it's still possible to send the command without `id` if the new version with `id` was never used<br><br>Parameter `format` was added in 4.5.0.<br> `format` is used to identify in which format the data will be stored<br>Without `format`, the image will be considered as 4bpp |
 | 0x44 | imgStream   | `u32 size`<br>`u16 width`<br>`s16 x`<br>`s16 y` | 10 for the first chunk | Stream an image on display without saving it in memory<br>Default format is 1bpp<br>New format parameter added in 4.6.0 |
-| 0x45 | imgSave1bpp | `u32 size`<br>`u16 width`<br>`u8 id`     | 7 for the first chunk   | Save 1bpp image of `size` bytes and `width` pixel<br><br>Parameter `id` was added in 4.0.0<br>it's still possible to send the command without `id` if the new version with `id` was never used<br><br> Since 4.5.0, it's recommended to use the command `imgSave` with `format` parameter |
+| 0x45 | imgSave1bpp | `u8 id`<br>`u32 size`<br>`u16 width`     | 7 for the first chunk   | Save 1bpp image of `size` bytes and `width` pixel<br><br>Parameter `id` was added in 4.0.0<br>it's still possible to send the command without `id` if the new version with `id` was never used<br><br> Since 4.5.0, it's recommended to use the command `imgSave` with `format` parameter |
 | 0xA1 | WConfigID   | `u8 cfgId`<br>`u32 version`<br>`u8 unused[3]` | 8           | Write config, version is used to track which config is in the device<br>Deprecated since 4.0.0<br>`cfgId` 1 is redirected to system config<br>`cfgId` 2 redirect to a config named '2' |
 | 0xA2 | RConfigID   | `u8 cfgId`                               | 1                       | Read config<br>Deprecated since 4.0.0                           |
 | 0xA3 | SetConfigID | `u8 cfgId`                               | 1                       | Set current config to display images, layouts, and fonts<br>Deprecated since 4.0.0 |
@@ -1568,7 +1568,7 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
 This documentation supports the ActiveLook Firmware version *4.11.2b*  
-Document version "fw-4.11.2_doc-revB"  
+Document version "fw-4.11.2_doc-revC"  
 
 ## 8. Support
 Reach out to the ActiveLook® team at one of the following places:
