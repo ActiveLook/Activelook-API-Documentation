@@ -349,7 +349,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | ID   | commands     | parameters         | Data length (B) | Description                                                  |
 |------|--------------|--------------------|---------------- |--------------------------------------------------------------|
 | 0x00 | displayPower | `bool en`          | 1               | Enable / disable power of the display                        |
-| 0x01 | clear        | -                  | 0               | Clear the display memory (black screen)                      |
+| 0x01 | clear        | -                  | 0               | Clear the display memory (black screen)<br>⚠ since version 4.12.0 `clear` is held by the graphic engine. |
 | 0x02 | grey         | `u8 lvl`           | 1               | Set the whole display to the corresponding grey level (0 to 15) |
 | 0x03 | demo         | `u8 demo_id`       | 1               | Display demonstration:<br>0: Fill screen<br>1: Rectangle with a cross in it<br>2: display saved images, call multiple times to go through all saved images |
 | 0x05 | battery      | -                  | 0               | Get the battery level in %                                   |
@@ -402,7 +402,8 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | 0x36 | circf      | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw a full circle at the corresponding coordinates                      |
 | 0x37 | txt        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`u8 f`<br>`u8 c`<br>`str string[255]` | >= 8            | Write text `string` at coordinates (x,y) with rotation, font size, and color |
 | 0x38 | polyline   | `u8 thickness`<br>`u8 reserved`<br>`u8 reserved`<br>`s16 x0`<br>`s16 y0`<br>...<br>`s16 xN`<br>`s16 yN` | 3 + (n + 1) * 4     | Draw multiple connected lines at the corresponding coordinates. Thickness is set for all lines.<br> `Backward compatibility`: The first 3 bytes can be omitted. The length should be equal to (n + 1) * 4. In these case, thickness is equal to 1.|
-| 0x39 | holdFlush  | `u8 action`                                  | 1               | Hold or flush the graphic engine.<br>When held, new display commands are stored in memory and are displayed when the graphic engine is flushed.<br>This allows stacking multiple graphic operations and displaying them simultaneously without screen flickering.<br>The command is nested, the `flush` must be used the same number of times the `hold` was used<br>`action` = 0 : Hold display<br>`action` = 1 : Flush display<br>`action` = 0xFF : Reset and flush all stacked hold. To be used when the state of the device is unknown<br>After a BLE disconnect or an overflow error graphic engine is reset and flushed<br>⚠ `clear` is not held by the graphic engine, a white rectangle can be used instead. |
+| 0x39 | holdFlush  | `u8 action`                                  | 1               | Hold or flush the graphic engine.<br>When held, new display commands are stored in memory and are displayed when the graphic engine is flushed.<br>This allows stacking multiple graphic operations and displaying them simultaneously without screen flickering.<br>The command is nested, the `flush` must be used the same number of times the `hold` was used<br>`action` = 0 : Hold display<br>`action` = 1 : Flush display<br>`action` = 0xFF : Reset and flush all stacked hold. To be used when the state of the device is unknown<br>After a BLE disconnect or an overflow error graphic engine is reset and flushed<br>⚠ since version 4.12.0 `clear` command is held by the graphic engine. |
+| 0x3C | arc        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`s16 angle_start`<br>`s16 angle_end`<br>`u8 thickness` | 10 | Draw an arc circle at the corresponding coordinates.<br>Angles are in degrees, begin at 3 o'clock, and increase clockwise. |
 
 
 ### 4.7. Images commands
@@ -644,7 +645,7 @@ All graphical elements saved (layouts, images, etc) are regrouped in a configura
 
 Configurations share a memory pool of 3MB. The device has one 'System config' that can't be deleted and multiple 'user configs'. 'System config' is set during manufacturing and store 'System layouts' used for specific events (see Layout section).  
 
-Before adding a new element, the user must ensure if there is enough memory available. This can be done with the `cfgFreeSpace` command. The maximum number of configurations is limited to 22.
+Before adding a new element, the user must ensure if there is enough memory available. This can be done with the `cfgFreeSpace` command. The maximum number of configurations is limited to 12.
 
 On missing free space, some configurations must be deleted. Configurations can be listed with the `cfgList` command to get their size, usage order (`usgCnt`), and install/update order (`installCnt`).  
 The 'install counter' is updated on the `cfgWrite` command, the 'usage counter' is updated on the `cfgSelect` command  
@@ -1567,8 +1568,8 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 ## 7. Credit
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
-This documentation supports the ActiveLook Firmware version *4.11.2b*  
-Document version "fw-4.11.2_doc-revC"  
+This documentation supports the ActiveLook Firmware version *4.12.0b*  
+Document version "fw-4.12.0_doc-revA"  
 
 ## 8. Support
 Reach out to the ActiveLook® team at one of the following places:
