@@ -1448,18 +1448,18 @@ The frame will save gauge 1, in the middle of the screen (x=151, y=127), of exte
 
 Display Gauge 1, 85%: `0xFF7000070155AA`
 
-| FF       | 70         | 00         | 07           | -        | 0155         | AA     |
-|----------|------------|------------|--------------|----------|--------------|--------|
-| Start ID | Command ID | Cmd Format | Frame length | Query ID | Gauge 1, 85% | End ID |
+| FF       | 70         | 00         | 07           | -        | 01           | 55           | AA     |
+|----------|------------|------------|--------------|----------|--------------|--------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Gauge 1      | 85%          | End ID |
 
 
 Once a gauge is saved, it can be included in a layout as an additional command, allowing to display the value in the center.
 
-Save Layout: `0xFF63001F1409000000012FE60F00020100AF8704010A0109007800870125AA`
+Save Layout: `0xFF60001F1409000000012FE60F00020100AF8704010A0109006C00870125AA`
 
 Frame parsing: 
 
-| FF       | 63         | 00         | 1F           | -        | 1409000000012FE60F00020100AF8704010A0109006C00870125 | AA     |
+| FF       | 60         | 00         | 1F           | -        | 1409000000012FE60F00020100AF8704010A0109006C00870125 | AA     |
 |----------|------------|------------|--------------|----------|------------------------------------------------------|--------|
 | Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                                                 | End ID |
 
@@ -1476,7 +1476,7 @@ Additional command Parsing:
 
 Here is the result with the command
 
-Display layout: `0xFF62000914835500AA`
+Display layout: `0xFF62000914383500AA`
 
 Frame parsing: 
 | FF       | 62         | 00         | 09           | -        | 14383500            | AA     |
@@ -1569,7 +1569,7 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
 This documentation supports the ActiveLook Firmware version *4.12.0b*  
-Document version "fw-4.12.0_doc-revA"  
+Document version "fw-4.12.0_doc-revB"  
 
 ## 8. Support
 Reach out to the ActiveLook® team at one of the following places:
