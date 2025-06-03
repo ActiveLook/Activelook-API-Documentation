@@ -468,7 +468,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 | ID   | commands   | data                           | Data length (B) | Description                                         |
 |------|------------|--------------------------------|-----------------|-----------------------------------------------------|
 | 0x64 | layoutList | `u8 id`<br>...<br>`u8 idN`     | n               | list of layouts in memory<br>Listing is not sorted  |
-| 0x67 | layoutGet  | `layout parameters`            | >= 17           | Layouts parameters without `id`                     |
+| 0x67 | layoutGet  | `layout parameters`            | >= 16           | Layouts parameters without `id`                     |
 
 
 ### 4.10. Gauge commands
@@ -1569,7 +1569,7 @@ Pages are defined as a set of layouts to be displayed together on the screen. Us
 The ActiveLook® technology is developed by [MICROOLED](http://www.microoled.net)
 
 This documentation supports the ActiveLook Firmware version *4.12.0b*  
-Document version "fw-4.12.0_doc-revB"  
+Document version "fw-4.12.0_doc-revC"  
 
 ## 8. Support
 Reach out to the ActiveLook® team at one of the following places:
