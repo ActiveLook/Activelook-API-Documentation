@@ -10,7 +10,7 @@ The unique combination of the ActiveLook® technology specificities (Extremely l
 
 All the ActiveLook displays can be controlled by an open and free wireless interface.
 
-ActiveLook has been developed by [ENGO](https://www.engoeyewear.com), a leading micro display manufacturer.
+ActiveLook has been developed by [ENGO](https://www.engoeyewear.com), a leading sports AR glasses manufacturer.
 
 
 ## Communication Interface Overview
