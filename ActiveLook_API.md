@@ -80,7 +80,7 @@ ActiveLook® glasses typically includes:
 
 * Glasses frame and specifically designed lenses protecting the user from wind and sunlight as well as maximizing the visual experience.
 * An optical system projecting the image from the display into the user field of view.
-* A low energy consumption and high brightness MICROOLED® memory based microdisplay with a resolution of 304 x 256 pixels (16 grey levels).
+* A low energy consumption and high brightness MICROOLED® memory based microdisplay with a resolution of 304 x 256 pixels (16 grey levels or 81 RG colors).
 * An electronic module managing the BLE interface and the display operation.
 * A capacitive sensor.
 * A gesture sensor.
@@ -158,9 +158,14 @@ UUID `0x180A`
 | Manufacturer Name String | `00002A29-0000-1000-8000-00805F9B34FB` | Read     | `Microoled` |
 | Model Number String      | `00002A24-0000-1000-8000-00805F9B34FB` | Read     | `A.LooK`    |
 | Serial Number String     | `00002A25-0000-1000-8000-00805F9B34FB` | Read     | `xxxxxxxxxx`|
-| Hardware version String  | `00002A27-0000-1000-8000-00805F9B34FB` | Read     | `ALK02C`    |
+| Hardware version String  | `00002A27-0000-1000-8000-00805F9B34FB` | Read     | `ALK03-MDP08ACRG` |
 | Firmware version String  | `00002A26-0000-1000-8000-00805F9B34FB` | Read     | `v4.11.2b`  |
 | Software version String  | `00002A28-0000-1000-8000-00805F9B34FB` | Read     | `1.0.0.1`   |
+
+The Hardware version String is of the form `ALKxx-MDPyyzzzz` (e.g. `ALK03-MDP08ACRG`, `ALK02-MDP05xxx`), where the `MDPyy` segment identifies the display module fitted to the device:
+
+- `MDP08` : color display
+- `MDP05` : grey levels display
 
 **Battery Service**
 
@@ -622,8 +627,14 @@ If the string length is shorter than the maximum length. The string must be NUL 
 
 ### 5.1. Color
 
-The ActiveLook® OLED display is a monochrome display with 15 different grey levels. It is designed as a memory frame buffer that retains the data while not overwritten. As each pixel has only 15 grey levels, the memory is designed with 2 pixels per byte.  
-It is possible to set the grey level with the color commands. The grey level will be used to draw all subsequent graphical objects until the color function is called again.
+The ActiveLook® OLED display exists in two variants: a grey-level display (16 grey levels) and a color display (81 RG colors). It is designed as a memory frame buffer that retains the data while not overwritten. On the grey-level display, as each pixel has only 16 grey levels, the memory is designed with 2 pixels per byte.  
+
+The display variant fitted on a device can be identified from the `MDPyy` segment of the Hardware version String (see [2.3. Services and characteristics](#23-services-and-characteristics)):
+
+- `MDP05` : grey levels display
+- `MDP08` : color display
+
+It is possible to set the grey level with the `grayscale` command, or the RG color with the `color` command (color glasses only). The value set will be used to draw all subsequent graphical objects until the color function is called again.
 
 
 ### 5.2. Luma
