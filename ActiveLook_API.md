@@ -38,12 +38,14 @@
 	- [5.3. Graphical Objects](#53-graphical-objects)
 	- [5.4. Configurations](#54-configurations)
 	- [5.5. Images](#55-images)
-		- [5.5.1. Saving Image, 4 bits per pixel](#551-saving-image-4-bits-per-pixel)
-		- [5.5.2. Saving Image, 1 bit per pixel](#552-saving-image-1-bit-per-pixel)
-		- [5.5.3. Saving image with Heatshrink compression](#553-saving-image-with-heatshrink-compression)
-		- [5.5.4. Saving image, 8 bits per pixel](#554-saving-image-8-bits-per-pixel)
-		- [5.5.5. Streaming Image](#555-streaming-image)
-		- [5.5.6. Coordinates](#556-coordinates)
+		- [5.5.1. Saving grayscale image, 4 bits per pixel](#551-saving-grayscale-image-4-bits-per-pixel)
+		- [5.5.2. Saving grayscale image, 1 bit per pixel](#552-saving-grayscale-image-1-bit-per-pixel)
+		- [5.5.3. Saving grayscale image with Heatshrink compression](#553-saving-grayscale-image-with-heatshrink-compression)
+		- [5.5.4. Saving grayscale image with transparency, 8 bits per pixel](#554-saving-grayscale-image-with-transparency-8-bits-per-pixel)
+		- [5.5.5. Saving color image, 8 bits per pixel](#555-saving-color-image-8-bits-per-pixel)
+		- [5.5.6. Saving color image with transparency, 8 bits per pixel + 4 bits per alpha](#556-saving-color-image-with-transparency-8-bits-per-pixel--4-bits-per-alpha)
+		- [5.5.7. Streaming Image](#557-streaming-image)
+		- [5.5.8. Coordinates](#558-coordinates)
 	- [5.6. Animation](#56-animation)
 		- [5.6.1. Saving animation](#561-saving-animation)
 		- [5.6.2. Animation display](#562-animation-display)
@@ -391,19 +393,21 @@ If the string length is shorter than the maximum length. The string must be NUL 
 
 **Master to ActiveLook**
 
-| ID   | commands   | Parameters                                   | Data length (B) | Description                                                              |
-|------|------------|----------------------------------------------|-----------------|--------------------------------------------------------------------------|
-| 0x30 | color      | `u8 color`                                   | 1               | Sets the grey level (0 to 15) used to draw the next graphical element    |
-| 0x31 | point      | `s16 x`<br>`s16 y`                           | 4               | Set a pixel on at the corresponding coordinates                          |
-| 0x32 | line       | `s16 x0`<br>`s16 y0`<br>`s16 x1`<br>`s16 y1` | 8               | Draw a line at the corresponding coordinates                             |
-| 0x33 | rect       | `s16 x0`<br>`s16 y0`<br>`s16 x1`<br>`s16 y1` | 8               | Draw an empty rectangle at the corresponding coordinates                 |
-| 0x34 | rectf      | `s16 x0`<br>`s16 y0`<br>`s16 x1`<br>`s16 y1` | 8               | Draw a full rectangle at the corresponding coordinates                   |
-| 0x35 | circ       | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw an empty circle at the corresponding coordinates                    |
-| 0x36 | circf      | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw a full circle at the corresponding coordinates                      |
-| 0x37 | txt        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`u8 f`<br>`u8 c`<br>`str string[255]` | >= 8            | Write text `string` at coordinates (x,y) with rotation, font size, and color |
-| 0x38 | polyline   | `u8 thickness`<br>`u8 reserved`<br>`u8 reserved`<br>`s16 x0`<br>`s16 y0`<br>...<br>`s16 xN`<br>`s16 yN` | 3 + (n + 1) * 4     | Draw multiple connected lines at the corresponding coordinates. Thickness is set for all lines.<br> `Backward compatibility`: The first 3 bytes can be omitted. The length should be equal to (n + 1) * 4. In these case, thickness is equal to 1.|
-| 0x39 | holdFlush  | `u8 action`                                  | 1               | Hold or flush the graphic engine.<br>When held, new display commands are stored in memory and are displayed when the graphic engine is flushed.<br>This allows stacking multiple graphic operations and displaying them simultaneously without screen flickering.<br>The command is nested, the `flush` must be used the same number of times the `hold` was used<br>`action` = 0 : Hold display<br>`action` = 1 : Flush display<br>`action` = 0xFF : Reset and flush all stacked hold. To be used when the state of the device is unknown<br>After a BLE disconnect or an overflow error graphic engine is reset and flushed<br>⚠ since version 4.12.0 `clear` command is held by the graphic engine. |
-| 0x3C | arc        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`s16 angle_start`<br>`s16 angle_end`<br>`u8 thickness` | 10 | Draw an arc circle at the corresponding coordinates.<br>Angles are in degrees, begin at 3 o'clock, and increase clockwise. |
+| ID   | commands   | Parameters                                   | Data length (B) | Description                                                              | |
+|------|------------|----------------------------------------------|-----------------|--------------------------------------------------------------------------|-|
+| 0x30 | grayscale  | `u8 greyLevel`                               | 1               | Sets the grey level (0 to 15) used to draw the next graphical element    | |
+| 0x3D | color      | `u8 color`                                   | 1               | Sets the red-green color value (0 to 255) used to draw the next graphical element. See the color palette in [5.5.5. Saving color image, 8 bits per pixel](#555-saving-color-image-8-bits-per-pixel) to choose the appropriate value. | ![COLOR_COMPATIBILITY](./resources/ActiveLook_color_glasses.png "Color compatibility")<br>ONLY AVAILABLE ON COLOR GLASSES |
+| 0x31 | point      | `s16 x`<br>`s16 y`                           | 4               | Set a pixel on at the corresponding coordinates                          | |
+| 0x32 | line       | `s16 x0`<br>`s16 y0`<br>`s16 x1`<br>`s16 y1` | 8               | Draw a line at the corresponding coordinates                             | |
+| 0x33 | rect       | `s16 x0`<br>`s16 y0`<br>`s16 x1`<br>`s16 y1` | 8               | Draw an empty rectangle at the corresponding coordinates                 | |
+| 0x34 | rectf      | `s16 x0`<br>`s16 y0`<br>`s16 x1`<br>`s16 y1` | 8               | Draw a full rectangle at the corresponding coordinates                   | |
+| 0x35 | circ       | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw an empty circle at the corresponding coordinates                    | |
+| 0x36 | circf      | `s16 x`<br>`s16 y`<br>`u8 r`                 | 5               | Draw a full circle at the corresponding coordinates                      | |
+| 0x37 | txt        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`u8 f`<br>`u8 grey`<br>`str string[255]` | >= 8 | Write text `string` at coordinates (x,y) with rotation, font size, and grayscale level | |
+| 0x3E | txtColor   | `s16 x`<br>`s16 y`<br>`u8 r`<br>`u8 f`<br>`u8 c`<br>`str string[255]`    | >= 8 | Write text `string` at coordinates (x,y) with rotation, font size, and color value (red-green). See the color palette in [5.5.5. Saving color image, 8 bits per pixel](#555-saving-color-image-8-bits-per-pixel) to choose the appropriate value. | ![COLOR_COMPATIBILITY](./resources/ActiveLook_color_glasses.png "Color compatibility")<br>ONLY AVAILABLE ON COLOR GLASSES |
+| 0x38 | polyline   | `u8 thickness`<br>`u8 reserved`<br>`u8 reserved`<br>`s16 x0`<br>`s16 y0`<br>...<br>`s16 xN`<br>`s16 yN` | 3 + (n + 1) * 4     | Draw multiple connected lines at the corresponding coordinates. Thickness is set for all lines.<br> `Backward compatibility`: The first 3 bytes can be omitted. The length should be equal to (n + 1) * 4. In these case, thickness is equal to 1.| |
+| 0x39 | holdFlush  | `u8 action`                                  | 1               | Hold or flush the graphic engine.<br>When held, new display commands are stored in memory and are displayed when the graphic engine is flushed.<br>This allows stacking multiple graphic operations and displaying them simultaneously without screen flickering.<br>The command is nested, the `flush` must be used the same number of times the `hold` was used<br>`action` = 0 : Hold display<br>`action` = 1 : Flush display<br>`action` = 0xFF : Reset and flush all stacked hold. To be used when the state of the device is unknown<br>After a BLE disconnect or an overflow error graphic engine is reset and flushed<br>⚠ since version 4.12.0 `clear` command is held by the graphic engine. | |
+| 0x3C | arc        | `s16 x`<br>`s16 y`<br>`u8 r`<br>`s16 angle_start`<br>`s16 angle_end`<br>`u8 thickness` | 10 | Draw an arc circle at the corresponding coordinates.<br>Angles are in degrees, begin at 3 o'clock, and increase clockwise. | |
 
 
 ### 4.7. Images commands
@@ -412,7 +416,7 @@ If the string length is shorter than the maximum length. The string must be NUL 
 
 | ID   | commands    | Parameters                             | Data length (B)         | Description                                                     |
 |------|-------------|----------------------------------------|-------------------------|-----------------------------------------------------------------|
-| 0x41 | imgSave     | `u8 id`<br>`u32 size`<br>`u16 width`<br>`u8 format` | 8 for the first chunk | Save an image of `size` bytes and `width` pixels<br>Save image according to `format`:<br>- 0x00: 4bpp<br>- 0x01: 1bpp, transformed into 4bpp by the firmware before saving<br>- 0x02: 4bpp with Heatshrink compression, decompressed into 4bpp by the firmware before saving<br>- 0x03: 4bpp with Heatshrink compression, stored compressed, decompressed into 4bpp before display<br>- 0x08: 8bpp with 4 bits for grey level and 4 bits for alpha channel |
+| 0x41 | imgSave     | `u8 id`<br>`u32 size`<br>`u16 width`<br>`u8 format` | 8 for the first chunk | Save an image of `size` bytes and `width` pixels<br>Save image according to `format`:<br>- 0x00: 4bpp<br>- 0x01: 1bpp, transformed into 4bpp by the firmware before saving<br>- 0x02: 4bpp with Heatshrink compression, decompressed into 4bpp by the firmware before saving<br>- 0x03: 4bpp with Heatshrink compression, stored compressed, decompressed into 4bpp before display<br>- 0x08: 8bpp with 4 bits for grey level and 4 bits for alpha channel<br>- 0x0A: 8bpp RG color (RRGG), color glasses only — see [5.5.5. Saving color image, 8 bits per pixel](#555-saving-color-image-8-bits-per-pixel)<br>- 0x0C: 8bpp RG color with 4-bit alpha channel, color glasses only — see [5.5.6. Saving color image with transparency, 8 bits per pixel + 4 bits per alpha](#556-saving-color-image-with-transparency-8-bits-per-pixel--4-bits-per-alpha) |
 | 0x42 | imgDisplay  | `u8 id`<br>`s16 x`<br>`s16 y`          | 5                       | Display image `id` to the corresponding coordinates<br>Coordinates are signed, they can be negative |
 | 0x44 | imgStream   | `u32 size`<br>`u16 width`<br>`s16 x`<br>`s16 y`<br>`u8 format` | 11 for the first chunk | Stream an image on display without saving it in memory<br>Supported format:<br>- 0x01: 1bpp<br>- 0x02: 4bpp with Heatshrink compression |
 | 0x46 | imgDelete   | `u8 id`                                | 1                       | Delete image<br>if `id`= 0xFF, delete all images                |
@@ -449,9 +453,10 @@ If the string length is shorter than the maximum length. The string must be NUL 
 
 **Master to ActiveLook**
 
-| ID   | commands                      | Parameters                    | Data length (B)    | Description                                             |
-|------|-------------------------------|-------------------------------|--------------------|---------------------------------------------------------|
-| 0x60 | layoutSave                    | `layout parameters`           | >= 17              | Save a layout                                           |
+| ID   | commands                      | Parameters                    | Data length (B)    | Description                                             | |
+|------|-------------------------------|-------------------------------|--------------------|---------------------------------------------------------|-|
+| 0x60 | layoutSave                    | `layout parameters`           | >= 17              | Save a layout with grayscale value for its sub elements | |
+| 0x6B | layoutSaveInColor             | `layout parameters`           | >= 17              | Save a layout with red-green color value. See the color palette in [5.5.5. Saving color image, 8 bits per pixel](#555-saving-color-image-8-bits-per-pixel) to choose the appropriate value. | ![COLOR_COMPATIBILITY](./resources/ActiveLook_color_glasses.png "Color compatibility")<br>ONLY AVAILABLE ON COLOR GLASSES |
 | 0x61 | layoutDelete                  | `u8 id`                       | 1                  | Delete a layout<br>if `id` = 0xFF, delete all layouts   |
 | 0x62 | layoutDisplay                 | `u8 id`<br>`str text[255]`    | 2                  | Display `text` with layout `id` parameters              |
 | 0x63 | layoutClear                   | `u8 id`                       | 1                  | Clears screen of the corresponding layout area          |
@@ -715,7 +720,7 @@ Once saved, it is possible to display the image with the `imgDisplay` command.
 
 At any moment it is possible to retrieve the list of the saved images with the `imgList` command.  
 
-#### 5.5.1. Saving Image, 4 bits per pixel
+#### 5.5.1. Saving grayscale image, 4 bits per pixel
 
 The `imgSave` command is used to save an image with 4bpp.
 
@@ -782,7 +787,7 @@ Example for a 15 x 10 image:
 0xFF410055000000FF0F0000000000FF00F00F000000F0000000F00000000F000000000F00F00000000000F0000F0000000000000F0F0000000000000F0F0000F00000000FF000F00F0F00F00000FF0F00F0FF0F00AA
 ```
 
-#### 5.5.2. Saving Image, 1 bit per pixel
+#### 5.5.2. Saving grayscale image, 1 bit per pixel
 
 To reduce image transfer time, images can also be sent with 1bpp compression.  
 It's compression with information loss, the grayscale image will be converted to black and white  
@@ -860,7 +865,7 @@ Example for a 15 x 10 image:
 0xFF410019C001300608080410022001400140814062211C1EAA
 ```
 
-#### 5.5.3. Saving image with Heatshrink compression
+#### 5.5.3. Saving grayscale image with Heatshrink compression
 
 Images can also be sent with Heatshrink compression to reduce image transfer time.  
 [Heatshrink](https://github.com/atomicobject/heatshrink) is a lossless compression based on [LZSS](https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Storer%E2%80%93Szymanski)  
@@ -913,13 +918,13 @@ Sending data:
 0xFFD0001244656D6F00000000000001E240AA
 ## save image #10, 80 bytes, 15 pixel width
 0xFF41000D0A00000050000F02AA
-## save decompressed image data
+## compressed image data
 0xFF4100280017FE1E065807C0107F001B05100820A308188D40C207A12A01046A22542297C00640AA
 ```
 
 For the image used in example (![example-15x10.png](/resources/example-15x10.png)), the compression ratio is 4.  
 
-#### 5.5.4. Saving image, 8 bits per pixel
+#### 5.5.4. Saving grayscale image with transparency, 8 bits per pixel
 
 To be used with transparency, images can be saved in a 8bpp format.  
 For each pixel, the 4 most significant bits represent the color level, and the 4 less significant bits represent the alpha channel : 0xX0 meaning full transparency and 0xXF meaning full opacity. For example, if a pixel is described by : "0b10110010", it has a level of color of "0b1011" and a level of transparency of "0b0010" (almost transparent).  
@@ -984,7 +989,125 @@ Example for a 15 x 10 image:
 ```
 
 
-#### 5.5.5. Streaming Image
+#### 5.5.5. Saving color image, 8 bits per pixel
+
+⚠ This feature is only available on glasses that have a color display.
+
+It is possible to save images with RG (Red-Green) colors. 81 colors are available for your images (see picture below). Each color is identified by a number (0-255) coded on 8 bits.
+
+![RRGG_colors.png](/resources/ActiveLook_RRGG_colors.png)
+
+⚠ The `cfgWrite` command is required before images upload.
+
+First, image identifier, 8bpp image size in bytes, image width in pixels (or bytes as 1 byte = 1 pixel here), and format must be sent.
+
+Example with 15 x 10 image:
+
+| FF       | 41         | 00         | 0D           | -        | 0A00000096000F0A            | AA     |
+|----------|------------|------------|--------------|----------|-----------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
+
+Data Parsing:
+
+| image identifier | 8bpp image size in bytes         | image width      | format    |
+|------------------|----------------------------------|------------------|-----------|
+| `0x0A`           | `0x00 0x00 0x00 0x96`            | `0x00 0x0F`      | `0x0A`    |
+| 10               | 150 bytes, 10 lines of 15 pixels | 15 pixels        | 8bpp RRGG |
+
+After, the image data must be sent with Heatshrink compression.
+
+Example of compression in python:
+
+```python
+import heatshrink2 as hs
+
+## convert image into 8bpp RRGG
+img8bpp = img_RRGG8bpp_conversion(img_path)
+
+## Heatshrink compression
+imgHeatShrink = hs.compress(img8bpp, window_sz2 = 8, lookahead_sz2 = 4)
+```
+
+Data are sent in chunks of 512 bytes with the command `imgSave`  
+Example for a 15 x 10 image:
+
+```python
+## write config "Demo"
+0xFFD0001244656D6F00000000000001E240AA
+## save image #10, 150 bytes, 15 pixel width
+0xFF41000D0A00000096000F0AAA
+## compressed image data
+0xFF410024002E6C0020CB02383500F826912210AC1B840A07681A0C8C0F405A82940E80AA
+```
+
+#### 5.5.6. Saving color image with transparency, 8 bits per pixel + 4 bits per alpha
+
+⚠ This feature is only available on glasses that have a color display.
+
+It is possible to save an image with RG (Red-Green) colors plus transparency. 81 colors are available for your images (see picture above in previous section). Each color is identified by a number (0-255) coded on 8 bits. Transparency is encoded using an additional 4-bit alpha channel per pixel.
+
+Each pixel is encoded as follows:
+
+- Pixel1 Color (8 bits)
+- Pixel2 Color (8 bits)
+- Alpha Byte: The MSB 4 bits represent Pixel2's alpha, and the LSB 4 bits represent Pixel1's alpha.
+
+⚠ For now, firmware supports only 0 or 15 values (boolean logic). Any value other than 0 will be interpreted as 15.
+
+Since the pixel data is grouped in pairs, if the image width is odd, the last pixel's value and its alpha are arbitrary (commonly set to 0).
+
+**Pixel Encoding Example**
+
+| Pixel 1 Color | Pixel 2 Color | Alpha Byte | Pixel 3 Color | Pixel 4 Color | Alpha Byte | Pixel 5 Color | Pixel 6 Color | Alpha Byte |
+|---------------|---------------|------------|---------------|---------------|------------|---------------|---------------|------------|
+| `0x12`        | `0x34`        | `0xF0`     | `0x56`        | `0x78`        | `0x0F`     | `0x9A`        | `0xBC`        | `0xF0`     |
+
+The row represents 6 pixels encoded into a 9-byte sequence, where each alpha byte encodes the transparency of the previous two pixels (4 LSB bits for the first pixel of the couple and 4 MSB bits for the second pixel).
+
+⚠ The `cfgWrite` command is required before uploading images.
+
+Encoding follows the same structure as the 8bpp RRGG image format. However, each pixel's transparency is included in the encoding, requiring an adjusted image processing step.
+
+Example with a 15 x 10 image:
+
+| FF       | 41         | 00         | 0D           | -        | 0A000000F0000F0C            | AA     |
+|----------|------------|------------|--------------|----------|-----------------------------|--------|
+| Start ID | Command ID | Cmd Format | Frame length | Query ID | Data                        | End ID |
+
+Data Parsing:
+
+| image identifier | image size in bytes                                                           | image width      | format               |
+|------------------|-------------------------------------------------------------------------------|------------------|----------------------|
+| `0x0A`           | `0x00 0x00 0x00 0xF0`                                                         | `0x00 0x0F`      | `0x0C`               |
+| 10               | 240 bytes, 10 lines of 24 bytes, i.e. 16 bytes for pixels + 8 bytes for alpha | 15 pixels        | 8bpp RRGG with ALPHA |
+
+After this, the image data must be sent with Heatshrink compression.
+
+Example of compression in Python:
+
+```python
+## Convert image into 8bpp RRGG + 4bpp Alpha
+img_with_alpha = img_RRGG8bpp_alpha_conversion(img_path)
+
+## Heatshrink compression
+imgHeatShrink = hs.compress(img_with_alpha, window_sz2=8, lookahead_sz2=4)
+```
+
+Data are sent in chunks of 512 bytes with the command `imgSave`  
+Example for a 15 x 10 image:
+
+```python
+## Write config "Demo"
+0xFFD0001244656D6F00000000000001E240AA
+## Save image #10, 240 bytes, 15 pixel width
+0xFF41000D0A000000F0000F0CAA
+## compressed image data
+0xFF41003F000FFC04B9BCD808416E0218785201061A90BA051404A0B60B98FA87681751658CA61E2CE19385FC2FE7DD0B903994282362FA34701040B68780AA
+```
+
+The same process should be applied for any image, ensuring the correct formatting and encoding before transmission.
+
+#### 5.5.7. Streaming Image
 
 It is also possible to stream images on display without saving them in memory with the command `imgStream`.  
 This method is based on the same principle used to save image with 1 bit per pixel or 4 bit per pixel with HeatShrink compression.  
@@ -1022,7 +1145,7 @@ For example, a 15x10 image can be done as follows :
 0xFF440019C001300608080410022001400140814062211C1EAA
 ```
 
-#### 5.5.6. Coordinates
+#### 5.5.8. Coordinates
 
 The coordinates passed as parameters (x0,y0) and (x1,y1) define the extremities of the element to be drawn. These coordinates are defined as signed integers on 16 bits (2 bytes), and thus can be negative. In that case, the drawn object will be automatically clipped to the screen size (304; 256). 
 The same principle applies to the images.
@@ -1307,8 +1430,8 @@ Here are layout data definitions:
 |      4      | u8        | Y             | Upper left Clipping region coordinate in the display                             |
 |      5      | u16       | width         | Width of the Clipping region in the display                                      |
 |      7      | u8        | height        | Height of the Clipping region in the display                                     |
-|      8      | u8        | ForeColor     | Define the color of the region [0...15]                                          |
-|      9      | u8        | BackColor     | Define the back color of the region [0...15]                                     |
+|      8      | u8        | ForeColor     | Define the foreground color of the region: grayscale value or red-green value, depending on the layout version (see "Color layout version" below) |
+|      9      | u8        | BackColor     | Define the background color of the region: grayscale value or red-green value, depending on the layout version (see "Color layout version" below) |
 |      10     | u8        | Font          | Define the font of the region                                                    |
 |      11     | bool      | TextValid     | Define if the argument of the layout is displayed using text                     |
 |      12     | u16       | Text X        | Define the position in the layout clipping region of the argument in the display |
@@ -1316,6 +1439,14 @@ Here are layout data definitions:
 |      15     | u8        | Text Rotation | Define the argument rotation                                                     |
 |      16     | bool      | Text opacity  | If true, the background of each character should be drawn, else, it leaves the background as is |
 |  17...125   | u8 [size] | Commands      | Additional graphical commands                                                    |
+
+**Color layout version**
+
+There are two layout versions. The first, called `GRAYSCALE_VERSION`, uses the color value passed through parameters as a grayscale value [0-15] — saved with the `layoutSave` command.
+
+The second, called `COLOR_VERSION`, is only available on color glasses and uses the color value passed through parameters as a red-green color value [0-255] — saved with the `layoutSaveInColor` command. See the color palette in [5.5.5. Saving color image, 8 bits per pixel](#555-saving-color-image-8-bits-per-pixel) to choose the appropriate value.
+
+---
 
 If additional graphical commands are needed, the size in terms of bytes of these commands is stored in the `size` parameter. The additional commands are identified as below, followed with the command parameters, 
 The element positions are all referenced from the layout clipping region (X0, Y0):
